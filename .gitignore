@@ -1,0 +1,9 @@
+*.py[cod]
+__pycache__
+
+.tox
+
+MANIFEST
+dist/
+*.egg
+*.egg-info

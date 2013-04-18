@@ -6,10 +6,11 @@ from nose.tools import assert_equal
 from zabby.tests import assert_is_instance
 from zabby.utils import b, u, string_types
 from zabby.agent import (AgentRequestHandler, set_protocol, set_data_source,
-                         ZBXDProtocol)
+                         ZBXDProtocol, DataSource)
 
 KEY = 'unicode/юникод'
 KEY_PROCESS_RESULT = 'result/результат'
+RETURN_VALUE = 1
 
 
 class TestAgentRequestHandler():
@@ -75,3 +76,40 @@ class TestProtocol():
         self.protocol.send_response(self.client, "1")
         self.client.sendall.assert_called_with(ANY)
         assert_is_instance(self.client.sendall.call_args[0][0], bytes)
+
+
+class TestDataSource():
+    def setup(self):
+        self.key_parser = Mock()
+        self.key_parser.parse = lambda raw_key: (raw_key, [])
+
+        self.config = Mock()
+        self.function = Mock()
+        self.function.return_value = RETURN_VALUE
+        self.config.items = {
+            KEY: self.function
+        }
+
+        self.data_source = DataSource(self.key_parser, self.config)
+
+    def test_calls_function(self):
+        value = self.data_source.process(KEY)
+        assert_equal(RETURN_VALUE, value)
+        self.function.assert_any_call()
+
+    def test_passes_arguments_to_function(self):
+        argument = 1
+        self.key_parser.parse = lambda raw_key: (raw_key, [argument])
+
+        value = self.data_source.process(KEY)
+        assert_equal(RETURN_VALUE, value)
+        self.function.assert_any_call(argument)
+
+    def test_returns_default_value_for_unknown_key(self):
+        value = self.data_source.process('unknown_key')
+        assert_equal(self.data_source.DEFAULT_VALUE, value)
+
+    def test_calling_function_that_does_not_need_arguments(self):
+        self.config.items[KEY] = lambda x: x
+        value = self.data_source.process(KEY)
+        assert_equal(self.data_source.DEFAULT_VALUE, value)

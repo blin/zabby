@@ -1,9 +1,13 @@
 import struct
+import logging
+
 try:
     import socketserver
 except ImportError:
     import SocketServer as socketserver
 from zabby.utils import b
+
+LOG = logging.getLogger(__name__)
 
 __PROTOCOL__ = None
 __DATA_SOURCE__ = None
@@ -96,3 +100,33 @@ class ZBXDProtocol():
         """
         response = self._calculate_response(value)
         client.sendall(response)
+
+
+class DataSource:
+    DEFAULT_VALUE = "ZBX_NOTSUPPORTED"
+
+    def __init__(self, key_parser, config):
+        self.key_parser = key_parser
+        self.config = config
+
+    def process(self, raw_key):
+        """
+        Calls function associated with raw_key and returns its result
+
+        If function for raw_key is not present or wrong number of arguments
+        is passed to it returns ZBX_NOTSUPPORTED
+        """
+        key, arguments = self.key_parser.parse(raw_key)
+
+        value = self.DEFAULT_VALUE
+        try:
+            function = self.config.items[key]
+            value = function(*arguments)
+        except KeyError:
+            LOG.warning("Unknown key: {key}".format(key=key))
+        except TypeError:
+            LOG.warning(
+                "Wrong arguments for key '{key}': {arguments}".format(
+                    key=key, arguments=arguments))
+
+        return value

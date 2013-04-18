@@ -1,0 +1,48 @@
+#!/usr/bin/python
+try:
+    import socketserver
+except ImportError:
+    import SocketServer as socketserver
+import threading
+import signal
+import logging
+
+from zabby.agent import (DataSource, KeyParser, AgentRequestHandler,
+                         set_data_source, set_protocol, ZBXDProtocol)
+
+logging.basicConfig()
+
+
+class Server(socketserver.TCPServer):
+    allow_reuse_address = True
+
+
+class Config:
+    def __init__(self):
+        self.items = {
+            'agent.ping': lambda: 1
+        }
+
+
+set_data_source(DataSource(KeyParser(), Config()))
+set_protocol(ZBXDProtocol())
+
+agent = Server(('127.0.0.1', 10050), AgentRequestHandler)
+
+threading.Thread(target=agent.serve_forever).start()
+
+shutdown = threading.Event()
+
+
+def shutdown_handler(signal, frame):
+    agent.shutdown()
+    shutdown.set()
+
+
+signal.signal(signal.SIGINT, shutdown_handler)
+signal.signal(signal.SIGTERM, shutdown_handler)
+
+while not shutdown.is_set():
+    print("Waiting for signal")
+    signal.pause()
+    print("Got signal")

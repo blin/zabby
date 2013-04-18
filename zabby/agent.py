@@ -130,3 +130,31 @@ class DataSource:
                     key=key, arguments=arguments))
 
         return value
+
+
+class KeyParser():
+    def parse(self, raw_key):
+        """
+        Separates key from arguments
+
+        :returns: Tuple containing key and a list of arguments
+
+        >>> KeyParser().parse('key')
+        ('key', [])
+        >>> KeyParser().parse('key[1]')
+        ('key', ['1'])
+        >>> KeyParser().parse('key[1,2]')
+        ('key', ['1', '2'])
+        """
+        raw_key = raw_key.rstrip()
+
+        opening_bracket_index = raw_key.find("[")
+        if opening_bracket_index != -1:
+            key = raw_key[:opening_bracket_index]
+            unparsed_arguments = raw_key[opening_bracket_index + 1:-1]
+            arguments = unparsed_arguments.split(",")
+        else:
+            key = raw_key
+            arguments = []
+
+        return key, arguments

@@ -6,7 +6,7 @@ from nose.tools import assert_equal
 from zabby.tests import assert_is_instance
 from zabby.utils import b, u, string_types
 from zabby.agent import (AgentRequestHandler, set_protocol, set_data_source,
-                         ZBXDProtocol, DataSource)
+                         ZBXDProtocol, DataSource, KeyParser)
 
 KEY = 'unicode/юникод'
 KEY_PROCESS_RESULT = 'result/результат'
@@ -113,3 +113,20 @@ class TestDataSource():
         self.config.items[KEY] = lambda x: x
         value = self.data_source.process(KEY)
         assert_equal(self.data_source.DEFAULT_VALUE, value)
+
+
+class TestKeyParser():
+    def setUp(self):
+        self.parser = KeyParser()
+
+    def test_key_without_arguments(self):
+        key, arguments = self.parser.parse(KEY)
+        assert_equal(0, len(arguments))
+
+    def test_key_with_one_argument(self):
+        key, arguments = self.parser.parse(KEY + '[1]')
+        assert_equal(1, len(arguments))
+
+    def test_key_with_newline(self):
+        key, arguments = self.parser.parse(KEY + '\n')
+        assert_equal(KEY, key)

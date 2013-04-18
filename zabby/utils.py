@@ -1,14 +1,20 @@
-import six
+import sys
 
-if six.PY3:
+PY3 = sys.version_info[0] == 3
+
+if PY3:
     def b(s):
         return s.encode('utf-8')
 
     def u(s):
         return s
+
+    string_types = str,
 else:
     def b(s):
         return s
 
     def u(s):
         return s.decode('utf-8')
+
+    string_types = basestring,

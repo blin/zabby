@@ -1,12 +1,10 @@
 # coding=utf-8
 import struct
-from six import string_types
 from mock import Mock, ANY
 from nose.tools import assert_equal
 
-
 from zabby.tests import assert_is_instance
-from zabby.utils import b, u
+from zabby.utils import b, u, string_types
 from zabby.agent import (AgentRequestHandler, set_protocol, set_data_source,
                          ZBXDProtocol)
 

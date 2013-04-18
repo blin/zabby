@@ -1,5 +1,8 @@
 import struct
-from six.moves import socketserver
+try:
+    import socketserver
+except ImportError:
+    import SocketServer as socketserver
 from zabby.utils import b
 
 __PROTOCOL__ = None

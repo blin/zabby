@@ -11,7 +11,6 @@ setup(
     author='blin',
     author_email='blin@f4oe.org',
     description='This is a fork of zabbix agent to python',
-    install_requires=['six'],
     classifiers=[
         'Development Status :: 1 - Planning',
         'Topic :: System :: Monitoring',

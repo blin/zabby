@@ -5,7 +5,7 @@ from zabby import __version__
 setup(
     name='zabby',
     version=__version__,
-    packages=['zabby', 'zabby.tests'],
+    packages=['zabby', 'zabby.core', 'zabby.tests'],
     url='https://github.com/blin/zabby',
     license='MIT',
     author='blin',

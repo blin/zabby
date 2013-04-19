@@ -1,0 +1,57 @@
+import imp
+from zabby.core.exceptions import ConfigurationError
+from zabby.utils import string_types, integer_types
+
+
+class ConfigManager:
+    def __init__(self, config_path, config_loader):
+        self._config_path = config_path
+        self._config_loader = config_loader
+
+        self._config = None
+        self.listen_address = (None, None)
+        self.items = dict()
+
+    def update_config(self):
+        """
+        Reloads configuration from config_path binding
+        """
+        try:
+            self._config = self._config_loader.load(self._config_path)
+            self._set_listen_address()
+            self._load_items()
+        except (AttributeError, IOError, SyntaxError) as e:
+            raise ConfigurationError(e)
+
+    def _set_listen_address(self):
+        self._check_type(self._config.listen_host, string_types)
+        self._check_type(self._config.listen_port, integer_types)
+        self.listen_address = (self._config.listen_host,
+                               self._config.listen_port)
+
+    def _check_type(self, var, desired_type):
+        """ Raises ConfigurationError if var is not of desired_type """
+        if not isinstance(var, desired_type):
+            raise ConfigurationError("{var} should be {type}".format(
+                var=var, type=desired_type))
+
+    def _load_items(self):
+        items = dict()
+        for item_file in self._config.item_files:
+            item_module = self._config_loader.load(item_file)
+            self._check_type(item_module.items, dict)
+            items.update(item_module.items)
+
+        self.items = items
+
+
+class ModuleLoader():
+    def load(self, module_path):
+        """
+        Returns module contained in module_path
+
+        :raises: IOError if unable to access module_path
+        :raises: SyntaxError if module is not a valid python source
+        """
+        return imp.load_source(module_path, module_path)
+    

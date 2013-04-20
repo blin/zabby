@@ -6,25 +6,33 @@ except ImportError:
 import threading
 import signal
 import logging
+import optparse
 
 from zabby.agent import (DataSource, KeyParser, AgentRequestHandler,
                          set_data_source, set_protocol, ZBXDProtocol)
+from zabby.config_manager import ConfigManager, ModuleLoader
 
 logging.basicConfig()
+
+option_parser = optparse.OptionParser()
+
+option_parser.add_option(
+    '-c', '--config',
+    help='Absolute path to configuration file',
+    default='/etc/pyzabbix/agent_configuration.py'
+)
+
+options, _ = option_parser.parse_args()
 
 
 class Server(socketserver.TCPServer):
     allow_reuse_address = True
 
 
-class Config:
-    def __init__(self):
-        self.items = {
-            'agent.ping': lambda: 1
-        }
+config_manager = ConfigManager(options.config, ModuleLoader())
+config_manager.update_config()
 
-
-set_data_source(DataSource(KeyParser(), Config()))
+set_data_source(DataSource(KeyParser(), config_manager))
 set_protocol(ZBXDProtocol())
 
 agent = Server(('127.0.0.1', 10050), AgentRequestHandler)

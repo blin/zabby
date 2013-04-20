@@ -1,6 +1,9 @@
 import imp
+import logging
 from zabby.core.exceptions import ConfigurationError
 from zabby.utils import string_types, integer_types
+
+LOG = logging.getLogger(__name__)
 
 
 class ConfigManager:
@@ -53,5 +56,8 @@ class ModuleLoader():
         :raises: IOError if unable to access module_path
         :raises: SyntaxError if module is not a valid python source
         """
-        return imp.load_source(module_path, module_path)
-    
+        try:
+            return imp.load_source(module_path, module_path)
+        except (IOError, SyntaxError) as e:
+            LOG.error("Unable to load {0}".format(module_path))
+            raise e

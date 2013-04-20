@@ -5,7 +5,15 @@ from zabby import __version__
 setup(
     name='zabby',
     version=__version__,
-    packages=['zabby', 'zabby.core', 'zabby.tests'],
+    packages=[
+        'zabby',
+        'zabby.core',
+        'zabby.items',
+        'zabby.items.vfs',
+        'zabby.tests',
+        'zabby.tests.items',
+        'zabby.tests.items.vfs',
+    ],
     url='https://github.com/blin/zabby',
     license='MIT',
     author='blin',

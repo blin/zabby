@@ -1,7 +1,7 @@
 import imp
 import logging
 from zabby.core.exceptions import ConfigurationError
-from zabby.utils import string_types, integer_types
+from zabby.core.utils import string_types, integer_types
 
 LOG = logging.getLogger(__name__)
 

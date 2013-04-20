@@ -5,7 +5,7 @@ try:
     import socketserver
 except ImportError:
     import SocketServer as socketserver
-from zabby.utils import b
+from zabby.core.utils import b
 
 LOG = logging.getLogger(__name__)
 

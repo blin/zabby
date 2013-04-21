@@ -3,7 +3,8 @@ from zabby.tests import assert_is_instance
 
 from zabby.core import utils
 from zabby.core.exceptions import WrongArgumentError
-from zabby.core.utils import SIZE_CONVERSION_MODES, validate_mode, convert_size, integer_types
+from zabby.core.six import integer_types
+from zabby.core.utils import SIZE_CONVERSION_MODES, validate_mode, convert_size
 
 
 def test_validate_mode_raises_exception_if_mode_is_not_available():

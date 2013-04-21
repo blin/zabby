@@ -4,7 +4,8 @@ from mock import Mock
 from nose.tools import assert_raises, assert_equal
 
 from zabby.tests import assert_is_instance
-from zabby.core.utils import string_types, integer_types, write_to_file
+from zabby.core.utils import write_to_file
+from zabby.core.six import string_types, integer_types
 from zabby.config_manager import ConfigManager, ModuleLoader
 from zabby.core.exceptions import ConfigurationError
 

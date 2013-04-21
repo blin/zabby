@@ -1,6 +1,6 @@
 from nose.plugins.attrib import attr
 
-from zabby.core.utils import integer_types
+from zabby.core.six import integer_types
 from zabby.hostos import detect_host_os
 from zabby.tests import assert_is_instance, assert_less
 

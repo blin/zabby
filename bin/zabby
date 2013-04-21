@@ -35,7 +35,7 @@ config_manager.update_config()
 set_data_source(DataSource(KeyParser(), config_manager))
 set_protocol(ZBXDProtocol())
 
-agent = Server(('127.0.0.1', 10050), AgentRequestHandler)
+agent = Server(config_manager.listen_address, AgentRequestHandler)
 
 threading.Thread(target=agent.serve_forever).start()
 

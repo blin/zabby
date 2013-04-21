@@ -7,4 +7,5 @@ items = {
     'agent.version': lambda: __version__,
 
     'vfs.fs.size': vfs.fs.size,
+    'vfs.fs.inode': vfs.fs.inode,
 }

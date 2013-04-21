@@ -40,3 +40,13 @@ class HostOS(object):
         :rtype : (int, int)
         """
         raise NotImplementedError
+
+    def fs_inodes(self, filesystem):
+        """
+        Get information about free and total space on a filesystem in bytes
+
+        :param filesystem: mount point to get inodes information for
+        :type filesystem: str
+        :rtype : (int, int)
+        """
+        raise NotImplementedError

@@ -11,9 +11,13 @@ except ImportError:
 try:
     from nose.tools import assert_not_in
     from nose.tools import assert_less
+    from nose.tools import assert_less_equal
 except ImportError:
     def assert_not_in(member, collection, msg=None):
         assert_true(member not in collection, msg)
 
     def assert_less(a, b, msg=None):
         assert_true(a < b, msg)
+
+    def assert_less_equal(a, b, msg=None):
+        assert_true(a <= b, msg)

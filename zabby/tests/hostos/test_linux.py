@@ -24,3 +24,11 @@ class TestLinux():
         assert_is_instance(total, integer_types)
 
         assert_less(free, total)
+
+    def test_fs_inodes_returns_tuple_of_integers_one_less_than_other(self):
+        free, total = self.linux.fs_inodes(PRESENT_FILESYSTEM)
+
+        assert_is_instance(free, integer_types)
+        assert_is_instance(total, integer_types)
+
+        assert_less(free, total)

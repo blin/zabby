@@ -22,3 +22,23 @@ def size(filesystem, mode="total", host_os=detect_host_os()):
     free, total = host_os.fs_size(filesystem)
 
     return convert_size(free, total, mode)
+
+
+def inode(filesystem, mode="total", host_os=detect_host_os()):
+    """
+    Returns free and total fs inodes converted according to mode
+
+    :param filesystem: what filesystem to check
+    :type filesystem: str
+
+    :param mode: one of free, total, used, pfree, pused
+
+    :raises: WrongArgument if unsupported mode is supplied
+
+    :depends on: [host_os.fs_inodes]
+    """
+    validate_mode(mode, SIZE_CONVERSION_MODES)
+
+    free, total = host_os.fs_inodes(filesystem)
+
+    return convert_size(free, total, mode)

@@ -7,6 +7,8 @@ class Linux(HostOS):
     def fs_size(self, filesystem):
         """
         Uses statvfs system call to obtain information about filesystem
+
+        See `man 3 statvfs` for more information
         """
         statvfs_struct = os.statvfs(filesystem)
         total = statvfs_struct.f_blocks * statvfs_struct.f_bsize
@@ -16,6 +18,8 @@ class Linux(HostOS):
     def fs_inodes(self, filesystem):
         """
         Uses statvfs system call to obtain information about filesystem
+
+        See `man 3 statvfs` for more information
         """
         statvfs_struct = os.statvfs(filesystem)
         total = statvfs_struct.f_files

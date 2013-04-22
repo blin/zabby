@@ -1,8 +1,30 @@
 import os
-from zabby.core.exceptions import OperatingSystemError
+from ctypes import (cdll, Structure, POINTER, c_int, c_char_p)
 
-from zabby.core.utils import lists_from_file, lines_from_file, dict_from_file, to_bytes
+from zabby.core.exceptions import OperatingSystemError
+from zabby.core.six import b
+from zabby.core.utils import (lists_from_file, lines_from_file, dict_from_file,
+                              to_bytes)
 from zabby.hostos import HostOS, NetworkInterfaceInfo, ProcessInfo
+
+_libc = cdll.LoadLibrary("libc.so.6")
+
+
+class StructPasswd(Structure):
+    _fields_ = [
+        ("name", c_char_p),
+        ("passwd", c_char_p),
+        ("uid", c_int),
+        ("gid", c_int),
+        ("gecos", c_char_p),
+        ("dir", c_char_p),
+        ("shell", c_char_p),
+    ]
+
+
+_libc.getpwnam.argtypes = [c_char_p]
+_libc.getpwnam.restype = POINTER(StructPasswd)
+
 
 PROCESS_STATE_MAP = {
     "R (running)": "run",
@@ -122,3 +144,18 @@ class Linux(HostOS):
         process_status['VmSize'] = to_bytes(*process_status['VmSize'].split())
 
         return process_status
+
+    def uid(self, username):
+        """
+        Uses getpwnam system call to obtain UID
+
+        See `man 3 getpwnam` for more information
+        """
+        return self._passwd(username).uid
+
+    def _passwd(self, username):
+        pointer_to_passwd = _libc.getpwnam(b(username))
+        if pointer_to_passwd:
+            return pointer_to_passwd[0]
+        else:
+            raise OperatingSystemError('Invalid name: {0}'.format(username))

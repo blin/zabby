@@ -88,3 +88,9 @@ class HostOS(object):
         Returns an iterable of ProcessInfo
         """
         raise NotImplementedError
+
+    def uid(self, username):
+        """
+        Returns UID compatible with ProcessInfo.uid
+        """
+        raise NotImplementedError

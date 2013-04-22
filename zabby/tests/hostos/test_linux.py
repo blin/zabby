@@ -1,8 +1,10 @@
 from nose.plugins.attrib import attr
+from zabby.core.exceptions import OperatingSystemError
 
 from zabby.core.six import integer_types, string_types
 from zabby.hostos import detect_host_os, NetworkInterfaceInfo, ProcessInfo
 from zabby.tests import assert_is_instance, assert_less, assert_in
+from nose.tools import assert_raises
 
 PRESENT_FILESYSTEM = '/'
 PRESENT_INTERFACE = 'lo'
@@ -63,3 +65,11 @@ class TestLinux():
 
         # at least init should be here
         assert_less(0, len(process_infos))
+
+    def test_uid_returns_integer(self):
+        uid = self.linux.uid('root')
+
+        assert_is_instance(uid, integer_types)
+
+    def test_uid_raises_exception_on_invalid_username(self):
+        assert_raises(OperatingSystemError, self.linux.uid, '')

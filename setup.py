@@ -22,7 +22,7 @@ setup(
     author='blin',
     author_email='blin@f4oe.org',
     description='This is a fork of zabbix agent to python',
-    scripts=['bin/zabby'],
+    scripts=['bin/zabby', 'bin/zabby_interactive', ],
     package_data={'zabby': ['examples/*']},
     classifiers=[
         'Development Status :: 1 - Planning',

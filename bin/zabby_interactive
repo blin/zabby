@@ -1,0 +1,6 @@
+#!/usr/bin/python -i
+
+from zabby.hostos import detect_host_os
+from zabby.items import *
+
+host_os = detect_host_os()

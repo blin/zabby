@@ -33,6 +33,11 @@ NetworkInterfaceInfo = namedtuple(
     NETWORK_INTERFACE_INFO_FIELDS
 )
 
+ProcessInfo = namedtuple(
+    'ProcessInfo',
+    ['name', 'uid', 'state', 'command_line', 'used_memory', ]
+)
+
 
 class HostOS(object):
     """
@@ -75,5 +80,11 @@ class HostOS(object):
         """
         Returns named tuple NetworkInterfaceInfo that contains information on
         amount of incoming/outgoing bytes, packets, errors and dropped packets
+        """
+        raise NotImplementedError
+
+    def process_infos(self):
+        """
+        Returns an iterable of ProcessInfo
         """
         raise NotImplementedError

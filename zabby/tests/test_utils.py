@@ -2,12 +2,12 @@ from nose.tools import assert_raises, assert_equal
 
 from zabby.tests import (assert_is_instance, ensure_removed,
                          ensure_contains_only_formatted_lines,
-                         assert_less_equal)
+                         assert_less_equal, assert_less)
 from zabby.core import utils
 from zabby.core.exceptions import WrongArgumentError, OperatingSystemError
 from zabby.core.six import integer_types, string_types
 from zabby.core.utils import (SIZE_CONVERSION_MODES, validate_mode,
-                              convert_size, lines_from_file, lists_from_file)
+                              convert_size, lines_from_file, lists_from_file, dict_from_file, to_bytes)
 
 
 def test_validate_mode_raises_exception_if_mode_is_not_available():
@@ -69,3 +69,33 @@ class TestListsFromFile():
 
         for found_list in found_lists:
             assert_is_instance(found_list, list)
+
+
+class TestDictFromFile():
+    def test_returns_dict(self):
+        ensure_contains_only_formatted_lines(FILE_PATH, 'key value')
+
+        d = dict_from_file(FILE_PATH)
+
+        assert_is_instance(d, dict)
+
+        assert_less(0, len(d))
+
+    def test_lines_without_value_are_not_included(self):
+        ensure_contains_only_formatted_lines(FILE_PATH, 'key')
+
+        d = dict_from_file(FILE_PATH)
+
+        assert_equal(0, len(d))
+
+
+class TestToBytes():
+    def test_raises_exception_if_wrong_factor_is_passed(self):
+        assert_raises(WrongArgumentError, to_bytes, 1, 'wrong')
+
+    def test_raises_exception_if_value_is_not_convertible_to_int(self):
+        assert_raises(ValueError, to_bytes, 'wrong', 'kB')
+
+    def test_returns_integer(self):
+        value = to_bytes(1, 'kB')
+        assert_is_instance(value, integer_types)

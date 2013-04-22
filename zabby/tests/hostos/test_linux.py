@@ -1,7 +1,7 @@
 from nose.plugins.attrib import attr
 
 from zabby.core.six import integer_types, string_types
-from zabby.hostos import detect_host_os, NetworkInterfaceInfo
+from zabby.hostos import detect_host_os, NetworkInterfaceInfo, ProcessInfo
 from zabby.tests import assert_is_instance, assert_less, assert_in
 
 PRESENT_FILESYSTEM = '/'
@@ -49,3 +49,17 @@ class TestLinux():
         assert_is_instance(interface_info, NetworkInterfaceInfo)
         for key, value in interface_info._asdict().items():
             assert_is_instance(value, integer_types)
+
+    def test_process_infos_returns_iterable_of_ProcessInfo(self):
+        process_infos = list(self.linux.process_infos())
+
+        for process_info in process_infos:
+            assert_is_instance(process_info, ProcessInfo)
+
+    def test_process_infos_contains_processes_run_by_root(self):
+        process_infos = [proc_info
+                         for proc_info in self.linux.process_infos()
+                         if proc_info.uid == 0]
+
+        # at least init should be here
+        assert_less(0, len(process_infos))

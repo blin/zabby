@@ -81,3 +81,37 @@ def lists_from_file(file_path, sep=None, maxsplit=-1):
     """
     lines = lines_from_file(file_path)
     return [line.split(sep, maxsplit) for line in lines]
+
+
+def dict_from_file(file_path, sep=None):
+    """
+    Returns dict read from file
+
+    Dict is constructed by making first element a key and the rest a value
+    """
+    lists = lists_from_file(file_path, sep, 1)
+    d = dict()
+    for l in lists:
+        if len(l) == 2:  # exclude lines without value
+            key, value = l
+            d[key] = value
+    return d
+
+BYTE_SCALE = {
+    'kB': 1024,
+    'mB': 1024 * 1024,
+    'GB': 1024 * 1024 * 1024,
+    'TB': 1024 * 1024 * 1024 * 1024,
+}
+
+
+def to_bytes(value, factor):
+    """
+    Converts value with a factor, such as '10 kB' to bytes
+
+    :raises: ValueError if value is not convertible to int
+    :raises: WrongArgumentError if factor is not known
+    """
+    validate_mode(factor, BYTE_SCALE.keys())
+
+    return int(value) * BYTE_SCALE[factor]

@@ -10,4 +10,5 @@ items = {
     'vfs.fs.inode': vfs.fs.inode,
 
     'net.if.in': net.interface.incoming,
+    'net.if.out': net.interface.outgoing,
 }

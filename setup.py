@@ -10,6 +10,7 @@ setup(
         'zabby.core',
         'zabby.items',
         'zabby.items.vfs',
+        'zabby.items.net',
         'zabby.hostos',
         'zabby.tests',
         'zabby.tests.items',

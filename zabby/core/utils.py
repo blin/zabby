@@ -1,6 +1,7 @@
 from __future__ import division
+from itertools import islice
 
-from zabby.core.exceptions import WrongArgumentError
+from zabby.core.exceptions import WrongArgumentError, OperatingSystemError
 
 
 def write_to_file(file_path, value):
@@ -53,3 +54,30 @@ def convert_size(free, total, mode):
         used = (total - free)
         value = (used / total) * 100
     return value
+
+
+def lines_from_file(file_path, n=None):
+    """
+    Returns list of lines read from file
+
+    :param n: Number of lines to read from file
+    :raises: OperatingSystemError if file is empty
+    :raises: IOError if unable to read lines from file
+    """
+    with open(file_path, "r") as f:
+        lines = list(islice((line.rstrip() for line in f), n))
+
+    if len(lines) == 0:
+        raise OperatingSystemError("{file} is empty".format(file=file_path))
+
+    return lines
+
+
+def lists_from_file(file_path, sep=None, maxsplit=-1):
+    """
+    Returns list of lists read from file
+
+    List is constructed by splitting every line with line.split(sep, maxsplit)
+    """
+    lines = lines_from_file(file_path)
+    return [line.split(sep, maxsplit) for line in lines]

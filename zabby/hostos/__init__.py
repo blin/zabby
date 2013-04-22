@@ -1,3 +1,4 @@
+from collections import namedtuple
 import sys
 
 CURRENT_OS = None
@@ -20,6 +21,17 @@ def detect_host_os():
             raise NotImplementedError
 
     return CURRENT_OS
+
+NETWORK_INTERFACE_INFO_FIELDS = [
+    'in_bytes', 'in_packets', 'in_errors', 'in_dropped',
+    'out_bytes', 'out_packets', 'out_errors', 'out_dropped',
+    'collisions'
+]
+
+NetworkInterfaceInfo = namedtuple(
+    'NetworkInterfaceInfo',
+    NETWORK_INTERFACE_INFO_FIELDS
+)
 
 
 class HostOS(object):
@@ -48,5 +60,20 @@ class HostOS(object):
         :param filesystem: mount point to get inodes information for
         :type filesystem: str
         :rtype : (int, int)
+        """
+        raise NotImplementedError
+
+    def net_interface_names(self):
+        """
+        Returns a set that contains all interface names available on this host
+
+        :rtype: set
+        """
+        raise NotImplementedError
+
+    def net_interface_info(self, net_interface_name):
+        """
+        Returns named tuple NetworkInterfaceInfo that contains information on
+        amount of incoming/outgoing bytes, packets, errors and dropped packets
         """
         raise NotImplementedError

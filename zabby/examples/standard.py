@@ -1,6 +1,6 @@
 from zabby import __version__
 
-from zabby.items import vfs, net, proc
+from zabby.items import vfs, net, proc, vm
 
 items = {
     'agent.ping': lambda: 1,
@@ -13,4 +13,6 @@ items = {
     'net.if.out': net.interface.outgoing,
 
     'proc.num': proc.num,
+
+    'vm.memory.size': vm.memory.size,
 }

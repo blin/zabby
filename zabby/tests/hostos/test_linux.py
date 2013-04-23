@@ -73,3 +73,16 @@ class TestLinux():
 
     def test_uid_raises_exception_on_invalid_username(self):
         assert_raises(OperatingSystemError, self.linux.uid, '')
+
+    def test_memory_returns_dict_of_numbers(self):
+        d = self.linux.memory()
+
+        assert_is_instance(d, dict)
+        for key, value in d.items():
+            assert_is_instance(value, (integer_types, float))
+
+    def test_memory_dict_contains_all_available_memory_types(self):
+        d = self.linux.memory()
+
+        for memory_type in self.linux.AVAILABLE_MEMORY_TYPES:
+            assert_in(memory_type, d)

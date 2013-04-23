@@ -25,7 +25,6 @@ class StructPasswd(Structure):
 _libc.getpwnam.argtypes = [c_char_p]
 _libc.getpwnam.restype = POINTER(StructPasswd)
 
-
 PROCESS_STATE_MAP = {
     "R (running)": "run",
     "S (sleeping)": "sleep",
@@ -34,6 +33,17 @@ PROCESS_STATE_MAP = {
 
 
 class Linux(HostOS):
+    AVAILABLE_MEMORY_TYPES = set([
+        'total',
+        'free',
+        'buffers',
+        'cached',
+        'available',
+        'pavailable',
+        'used',
+        'pused',
+    ])
+
     def fs_size(self, filesystem):
         """
         Uses statvfs system call to obtain information about filesystem
@@ -159,3 +169,30 @@ class Linux(HostOS):
             return pointer_to_passwd[0]
         else:
             raise OperatingSystemError('Invalid name: {0}'.format(username))
+
+    def memory(self):
+        """
+        Uses /proc/meminfo to obtain information on memory usage
+        """
+        mem_info = dict_from_file('/proc/meminfo')
+        total = to_bytes(*mem_info['MemTotal:'].split())
+        free = to_bytes(*mem_info['MemFree:'].split())
+        buffers = to_bytes(*mem_info['Buffers:'].split())
+        cached = to_bytes(*mem_info['Cached:'].split())
+
+        available = free + buffers + cached
+        pavailable = (available * 100) / total
+
+        used = total - available
+        pused = (used * 100) / total
+
+        return {
+            'total': total,
+            'free': free,
+            'buffers': buffers,
+            'cached': cached,
+            'available': available,
+            'pavailable': pavailable,
+            'used': used,
+            'pused': pused,
+        }

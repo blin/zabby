@@ -48,6 +48,8 @@ class HostOS(object):
     methods
     """
 
+    AVAILABLE_MEMORY_TYPES = set()
+
     def fs_size(self, filesystem):
         """
         Get information about free and total space on a filesystem in bytes
@@ -92,5 +94,13 @@ class HostOS(object):
     def uid(self, username):
         """
         Returns UID compatible with ProcessInfo.uid
+        """
+        raise NotImplementedError
+
+    def memory(self):
+        """
+        Returns a dict containing information about memory usage
+
+        Dict keys are equivalent to AVAILABLE_MEMORY_TYPES
         """
         raise NotImplementedError

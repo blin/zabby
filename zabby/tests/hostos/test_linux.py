@@ -7,7 +7,7 @@ from nose.tools import assert_raises
 from zabby.core.exceptions import OperatingSystemError
 from zabby.core.six import integer_types, string_types
 from zabby.hostos import (detect_host_os, NetworkInterfaceInfo, ProcessInfo,
-                          DiskDeviceStats, CpuTimes)
+                          DiskDeviceStats, CpuTimes, SystemLoad)
 from zabby.tests import assert_is_instance, assert_less, assert_in
 
 
@@ -137,6 +137,10 @@ class TestLinux():
     def test_max_number_of_running_processes(self):
         maxproc = self.linux.max_number_of_running_processes()
         assert_is_instance(maxproc, integer_types)
+
+    def test_system_load(self):
+        system_load = self.linux.system_load()
+        assert_is_instance(system_load, SystemLoad)
 
 
 @attr(os='linux')

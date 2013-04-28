@@ -2,6 +2,7 @@ from collections import namedtuple
 import sys
 import threading
 import logging
+from zabby.core.utils import AVERAGE_MODE
 
 LOG = logging.getLogger(__name__)
 
@@ -52,6 +53,8 @@ DiskDeviceStats = namedtuple('DiskDeviceStats', DISK_DEVICE_STATS_FIELDS)
 
 CPU_TIMES = ['user', 'nice', 'system', 'idle', 'iowait', 'irq', 'softirq', ]
 CpuTimes = namedtuple('CpuTimes', CPU_TIMES)
+
+SystemLoad = namedtuple('SystemLoad', list(AVERAGE_MODE.keys()))
 
 
 class HostOS(object):
@@ -196,5 +199,11 @@ class HostOS(object):
     def max_number_of_running_processes(self):
         """
         Returns maximum number of running processes
+        """
+        raise NotImplementedError
+
+    def system_load(self):
+        """
+        Returns SystemLoad
         """
         raise NotImplementedError

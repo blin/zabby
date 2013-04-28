@@ -46,3 +46,26 @@ def util(cpu='all', state='user', mode='avg1', host_os=detect_host_os()):
     return (((time_in_state * 100) / time_total)
             if time_total != 0
             else 0.0)
+
+
+def load(cpu='all', mode='avg1', host_os=detect_host_os()):
+    """
+    Returns average number of processes that are either in a runnable or
+    uninterruptable state.
+
+    :raises: WrongArgumentError if unknown cpu is supplied
+    :raises: WrongArgumentError if unknown mode is supplied
+
+    :depends on: [host_os.system_load, host_os.cpu_count]
+    """
+    validate_mode(cpu, ['all', 'percpu'])
+    validate_mode(mode, AVERAGE_MODE.keys())
+
+    system_load = host_os.system_load()
+
+    value = system_load._asdict()[mode]
+
+    if cpu == 'percpu':
+        value /= host_os.cpu_count()
+
+    return value

@@ -7,7 +7,7 @@ from zabby.core.six import b
 from zabby.core.utils import (lists_from_file, lines_from_file, dict_from_file,
                               to_bytes)
 from zabby.hostos import (HostOS, NetworkInterfaceInfo, ProcessInfo,
-                          DiskDeviceStats, CpuTimes)
+                          DiskDeviceStats, CpuTimes, SystemLoad)
 from zabby.hostos.collectors import DiskDeviceStatsCollector, CpuTimesCollector
 
 _libc = cdll.LoadLibrary("libc.so.6")
@@ -312,3 +312,9 @@ class Linux(HostOS):
         See `man 5 proc` for more information
         """
         return int(lines_from_file("/proc/sys/kernel/pid_max")[0])
+
+    def system_load(self):
+        """
+        Obtains information from python os.getloadavg()
+        """
+        return SystemLoad(*os.getloadavg())

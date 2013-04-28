@@ -22,6 +22,7 @@ def detect_host_os():
 
     return CURRENT_OS
 
+
 NETWORK_INTERFACE_INFO_FIELDS = [
     'in_bytes', 'in_packets', 'in_errors', 'in_dropped',
     'out_bytes', 'out_packets', 'out_errors', 'out_dropped',
@@ -38,6 +39,13 @@ ProcessInfo = namedtuple(
     ['name', 'uid', 'state', 'command_line', 'used_memory', ]
 )
 
+DISK_DEVICE_STATS_FIELDS = [
+    'read_sectors', 'read_operations', 'read_bytes',
+    'write_sectors', 'write_operations', 'write_bytes',
+]
+
+DiskDeviceStats = namedtuple('DiskDeviceStats', DISK_DEVICE_STATS_FIELDS)
+
 
 class HostOS(object):
     """
@@ -49,6 +57,7 @@ class HostOS(object):
     """
 
     AVAILABLE_MEMORY_TYPES = set()
+    AVAILABLE_DISK_DEVICE_STATS_TYPES = set()
 
     def fs_size(self, filesystem):
         """
@@ -102,5 +111,19 @@ class HostOS(object):
         Returns a dict containing information about memory usage
 
         Dict keys are equivalent to AVAILABLE_MEMORY_TYPES
+        """
+        raise NotImplementedError
+
+    def disk_device_names(self):
+        """
+        Returns a set that contains all disk device names available on this host
+
+        :rtype: set
+        """
+        raise NotImplementedError
+
+    def disk_device_stats(self, device):
+        """
+        Returns DiskDeviceStats for device
         """
         raise NotImplementedError

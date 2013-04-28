@@ -5,7 +5,8 @@ from zabby.core.exceptions import OperatingSystemError
 from zabby.core.six import b
 from zabby.core.utils import (lists_from_file, lines_from_file, dict_from_file,
                               to_bytes)
-from zabby.hostos import HostOS, NetworkInterfaceInfo, ProcessInfo
+from zabby.hostos import (HostOS, NetworkInterfaceInfo, ProcessInfo,
+                          DiskDeviceStats)
 
 _libc = cdll.LoadLibrary("libc.so.6")
 
@@ -43,6 +44,7 @@ class Linux(HostOS):
         'used',
         'pused',
     ])
+    AVAILABLE_DISK_DEVICE_STATS_TYPES = set(['sectors', 'operations'])
 
     def fs_size(self, filesystem):
         """
@@ -173,6 +175,8 @@ class Linux(HostOS):
     def memory(self):
         """
         Uses /proc/meminfo to obtain information on memory usage
+
+        See `man 5 proc` for more information
         """
         mem_info = dict_from_file('/proc/meminfo')
         total = to_bytes(*mem_info['MemTotal:'].split())
@@ -196,3 +200,35 @@ class Linux(HostOS):
             'used': used,
             'pused': pused,
         }
+
+    def disk_device_names(self):
+        """
+        Obtains information from '/proc/diskstats'
+
+        See `man 5 proc` for more information
+        """
+        return set(self._disk_devices_stats().keys())
+
+    def disk_device_stats(self, device):
+        """
+        Obtains information from '/proc/diskstats'
+
+        See `man 5 proc` for more information
+        """
+        return self._disk_devices_stats()[device]
+
+    def _disk_devices_stats(self):
+        diskstats = dict()
+        disks = lists_from_file('/proc/diskstats')
+        for disk in disks:
+            device = disk[2]
+            diskstat = DiskDeviceStats(
+                read_sectors=int(disk[5]),
+                read_operations=int(disk[3]),
+                read_bytes=0,
+                write_sectors=int(disk[9]),
+                write_operations=int(disk[7]),
+                write_bytes=0
+            )
+            diskstats[device] = diskstat
+        return diskstats

@@ -1,10 +1,12 @@
 from nose.plugins.attrib import attr
-from zabby.core.exceptions import OperatingSystemError
-
-from zabby.core.six import integer_types, string_types
-from zabby.hostos import detect_host_os, NetworkInterfaceInfo, ProcessInfo
-from zabby.tests import assert_is_instance, assert_less, assert_in
 from nose.tools import assert_raises
+
+from zabby.core.exceptions import OperatingSystemError
+from zabby.core.six import integer_types, string_types
+from zabby.hostos import (detect_host_os, NetworkInterfaceInfo, ProcessInfo,
+                          DiskDeviceStats)
+from zabby.tests import assert_is_instance, assert_less, assert_in
+
 
 PRESENT_FILESYSTEM = '/'
 PRESENT_INTERFACE = 'lo'
@@ -86,3 +88,21 @@ class TestLinux():
 
         for memory_type in self.linux.AVAILABLE_MEMORY_TYPES:
             assert_in(memory_type, d)
+
+    def test_disk_device_names_returns_set_of_strings(self):
+        device_names = self.linux.disk_device_names()
+
+        assert_is_instance(device_names, set)
+
+        for device_name in device_names:
+            assert_is_instance(device_name, string_types)
+
+    def test_disk_device_stats_returns_DiskDeviceStats(self):
+        device_names = self.linux.disk_device_names()
+
+        disk_device_stats = self.linux.disk_device_stats(device_names.pop())
+
+        assert_is_instance(disk_device_stats, DiskDeviceStats)
+
+        for key, value in disk_device_stats._asdict().items():
+            assert_is_instance(value, integer_types)

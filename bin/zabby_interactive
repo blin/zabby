@@ -4,3 +4,9 @@ from zabby.hostos import detect_host_os
 from zabby.items import *
 
 host_os = detect_host_os()
+
+print(
+    'You might want to start collectors'
+    ' by running host_os.start_collectors()'
+)
+print("Don't forget to stop them with host_os.stop_collectors()")

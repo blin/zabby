@@ -8,6 +8,7 @@ import signal
 import logging
 import optparse
 
+from zabby.hostos import detect_host_os
 from zabby.agent import (DataSource, KeyParser, AgentRequestHandler,
                          set_data_source, set_protocol, ZBXDProtocol)
 from zabby.config_manager import ConfigManager, ModuleLoader
@@ -36,6 +37,8 @@ set_data_source(DataSource(KeyParser(), config_manager))
 set_protocol(ZBXDProtocol())
 
 agent = Server(config_manager.listen_address, AgentRequestHandler)
+host_os = detect_host_os()
+host_os.start_collectors()
 
 threading.Thread(target=agent.serve_forever).start()
 
@@ -44,6 +47,7 @@ shutdown = threading.Event()
 
 def shutdown_handler(signal, frame):
     agent.shutdown()
+    host_os.stop_collectors()
     shutdown.set()
 
 

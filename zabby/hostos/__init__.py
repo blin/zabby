@@ -1,4 +1,8 @@
 import sys
+import threading
+import logging
+
+LOG = logging.getLogger(__name__)
 
 CURRENT_OS = None
 
@@ -30,6 +34,16 @@ class HostOS(object):
     Different data extraction operations may be enabled by implementing these
     methods
     """
+    def __init__(self):
+        self._collectors = list()
+
+    def start_collectors(self):
+        for collector in self._collectors:
+            threading.Thread(target=collector.run).start()
+
+    def stop_collectors(self):
+        for collector in self._collectors:
+            collector.stop()
 
     def fs_size(self, filesystem):
         """

@@ -2,6 +2,7 @@
 import struct
 from mock import Mock, ANY
 from nose.tools import assert_equal
+from zabby.core.exceptions import WrongArgumentError
 
 from zabby.tests import assert_is_instance
 from zabby.core.six import b, u, string_types
@@ -111,6 +112,20 @@ class TestDataSource():
 
     def test_calling_function_that_does_not_need_arguments(self):
         self.config.items[KEY] = lambda x: x
+        value = self.data_source.process(KEY)
+        assert_equal(self.data_source.DEFAULT_VALUE, value)
+
+    def test_calling_function_with_wrong_arguments(self):
+        function = Mock()
+        function.side_effect = WrongArgumentError
+        self.config.items[KEY] = function
+        value = self.data_source.process(KEY)
+        assert_equal(self.data_source.DEFAULT_VALUE, value)
+
+    def test_calling_function_that_raises_unexpected_exception(self):
+        function = Mock()
+        function.side_effect = Exception
+        self.config.items[KEY] = function
         value = self.data_source.process(KEY)
         assert_equal(self.data_source.DEFAULT_VALUE, value)
 

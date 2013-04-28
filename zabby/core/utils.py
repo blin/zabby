@@ -19,7 +19,7 @@ def validate_mode(mode, available_modes):
     """
     if mode not in available_modes:
         raise WrongArgumentError(
-            'Unknown mode "{mode}" should be one of {modes}'.format(
+            "Unknown mode '{mode}' should be one of {modes}".format(
                 mode=mode, modes=available_modes))
 
 

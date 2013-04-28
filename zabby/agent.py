@@ -1,5 +1,6 @@
 import struct
 import logging
+from zabby.core.exceptions import WrongArgumentError
 
 try:
     import socketserver
@@ -124,10 +125,13 @@ class DataSource:
             value = function(*arguments)
         except KeyError:
             LOG.warning("Unknown key: {key}".format(key=key))
-        except TypeError:
+        except (TypeError, WrongArgumentError) as e:
             LOG.warning(
                 "Wrong arguments for key '{key}': {arguments}".format(
                     key=key, arguments=arguments))
+            LOG.warning(e)
+        except Exception as e:
+            LOG.error("Unexpected exception: {0}".format(e))
 
         return value
 

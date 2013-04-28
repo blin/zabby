@@ -6,8 +6,8 @@ from zabby.core.six import b
 from zabby.core.utils import (lists_from_file, lines_from_file, dict_from_file,
                               to_bytes)
 from zabby.hostos import (HostOS, NetworkInterfaceInfo, ProcessInfo,
-                          DiskDeviceStats)
-from zabby.hostos.collectors import DiskDeviceStatsCollector
+                          DiskDeviceStats, CpuTimes)
+from zabby.hostos.collectors import DiskDeviceStatsCollector, CpuTimesCollector
 
 _libc = cdll.LoadLibrary("libc.so.6")
 
@@ -49,9 +49,12 @@ class Linux(HostOS):
 
     def __init__(self):
         super(Linux, self).__init__()
-        self._disk_device_stats_collector = DiskDeviceStatsCollector(900, 1,
-                                                                     self)
+
+        self._disk_device_stats_collector = DiskDeviceStatsCollector(900, self)
         self._collectors.append(self._disk_device_stats_collector)
+
+        self._cpu_times_collector = CpuTimesCollector(900, self)
+        self._collectors.append(self._cpu_times_collector)
 
     def fs_size(self, filesystem):
         """
@@ -245,3 +248,36 @@ class Linux(HostOS):
         Obtains information from DiskDeviceStatsCollector
         """
         return self._disk_device_stats_collector.get_stats(device, shift, now)
+
+    def cpu_count(self):
+        """
+        Obtains information from /proc/stat
+
+        See `man 5 proc` for more information
+        """
+        return len(self._cpus_times())
+
+    def cpu_times(self, cpu_id):
+        """
+        Obtains information from /proc/stat
+
+        See `man 5 proc` for more information
+        """
+        return self._cpus_times()[cpu_id]
+
+    def _cpus_times(self):
+        stats = lists_from_file('/proc/stat')
+        cpus_times = []
+        for stat in stats:
+            key, values = stat[0], stat[1:]
+            if key.startswith('cpu') and key != 'cpu':
+                cpu_times = [int(cpu_time) for cpu_time in values[:7]]
+                cpus_times.append(CpuTimes(*cpu_times))
+
+        return cpus_times
+
+    def cpu_times_shifted(self, cpu_id, shift):
+        """
+        Obtains information from CpuTimesCollector
+        """
+        return self._cpu_times_collector.get_times(cpu_id, shift)

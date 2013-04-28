@@ -6,7 +6,7 @@ from nose.tools import assert_raises
 from zabby.core.exceptions import OperatingSystemError
 from zabby.core.six import integer_types, string_types
 from zabby.hostos import (detect_host_os, NetworkInterfaceInfo, ProcessInfo,
-                          DiskDeviceStats)
+                          DiskDeviceStats, CpuTimes)
 from zabby.tests import assert_is_instance, assert_less, assert_in
 
 
@@ -110,6 +110,17 @@ class TestLinux():
         for key, value in disk_device_stats._asdict().items():
             assert_is_instance(value, integer_types)
 
+    def test_cpu_count_returns_integer(self):
+        cpu_count = self.linux.cpu_count()
+        assert_is_instance(cpu_count, integer_types)
+
+    def test_cpu_times(self):
+        cpu_id = list(range(self.linux.cpu_count())).pop()
+
+        cpu_times = self.linux.cpu_times(cpu_id)
+
+        assert_is_instance(cpu_times, CpuTimes)
+
 
 @attr(os='linux')
 class TestLinuxCollectors():
@@ -126,3 +137,12 @@ class TestLinuxCollectors():
         (stats, timestamp) = self.linux.disk_device_stats_shifted(devices.pop(),
                                                                   60, now)
         assert_is_instance(stats, DiskDeviceStats)
+
+    def test_cpu_times_collector_collection(self):
+        self.linux._cpu_times_collector._collect()
+
+        cpu_id = list(range(self.linux.cpu_count())).pop()
+
+        times = self.linux._cpu_times_collector.get_times(cpu_id, 60)
+
+        assert_is_instance(times, CpuTimes)

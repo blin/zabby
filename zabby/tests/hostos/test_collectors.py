@@ -1,9 +1,9 @@
 from mock import Mock, patch
 from nose.tools import assert_equal
-from zabby.tests import assert_less_equal
+from zabby.tests import assert_less_equal, assert_is_instance
 
-from zabby.hostos import HostOS, DiskDeviceStats
-from zabby.hostos.collectors import DiskDeviceStatsCollector
+from zabby.hostos import HostOS, DiskDeviceStats, CpuTimes, CPU_TIMES
+from zabby.hostos.collectors import DiskDeviceStatsCollector, CpuTimesCollector
 
 
 class TestHostOSCollectors():
@@ -56,11 +56,9 @@ class TestDiskDeviceStatsCollector():
         self.host_os.disk_device_stats.side_effect = increment_and_return_stats
         self.host_os.disk_device_names.return_value = set([DEVICE_NAME])
 
-        interval = 1
         self.shift = 5
         self.current_time = self.shift + 1
-        self.collector = DiskDeviceStatsCollector(self.shift, interval,
-                                                  self.host_os)
+        self.collector = DiskDeviceStatsCollector(self.shift, self.host_os)
 
     def teardown(self):
         self._patcher.stop()
@@ -76,6 +74,7 @@ class TestDiskDeviceStatsCollector():
         stats, timestamp = self.collector.get_stats(DEVICE_NAME, self.shift,
                                                     self.current_time)
         assert_less_equal(self.shift, self.current_time - timestamp)
+        assert_is_instance(stats, DiskDeviceStats)
 
     def test_returns_completely_shifted_stats_for_filled_history(self):
         for i in range(self.shift + 1):
@@ -84,3 +83,37 @@ class TestDiskDeviceStatsCollector():
         stats, timestamp = self.collector.get_stats(DEVICE_NAME, self.shift,
                                                     self.current_time)
         assert_equal(self.shift, self.current_time - timestamp)
+        assert_is_instance(stats, DiskDeviceStats)
+
+
+class TestCpuTimesCollector:
+    def setup(self):
+        self.host_os = Mock()
+        self.host_os.cpu_count.return_value = 2
+        self.host_os.cpu_times.return_value = CpuTimes(*[0 for _ in CPU_TIMES])
+
+        self.shift = 5
+        self.collector = CpuTimesCollector(self.shift, self.host_os)
+
+    def test_returns_none_if_history_is_empty(self):
+        cpu_count = self.host_os.cpu_count()
+        for cpu_id in range(cpu_count):
+            times = self.collector.get_times(cpu_id, self.shift)
+            assert_equal(None, times)
+
+    def test_returns_cpu_times_for_unfilled_history(self):
+        self.collector._collect()
+
+        cpu_count = self.host_os.cpu_count()
+        for cpu_id in range(cpu_count):
+            times = self.collector.get_times(cpu_id, self.shift)
+            assert_is_instance(times, CpuTimes)
+
+    def test_returns_cpu_times_for_filled_history(self):
+        for i in range(self.shift + 1):
+            self.collector._collect()
+
+        cpu_count = self.host_os.cpu_count()
+        for cpu_id in range(cpu_count):
+            times = self.collector.get_times(cpu_id, self.shift)
+            assert_is_instance(times, CpuTimes)

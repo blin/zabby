@@ -50,6 +50,9 @@ DISK_DEVICE_STATS_FIELDS = [
 
 DiskDeviceStats = namedtuple('DiskDeviceStats', DISK_DEVICE_STATS_FIELDS)
 
+CPU_TIMES = ['user', 'nice', 'system', 'idle', 'iowait', 'irq', 'softirq', ]
+CpuTimes = namedtuple('CpuTimes', CPU_TIMES)
+
 
 class HostOS(object):
     """
@@ -147,5 +150,24 @@ class HostOS(object):
         """
         Returns DiskDeviceStats for device shifted for shift seconds from now
         and timestamp for when this stats were taken
+        """
+        raise NotImplementedError
+
+    def cpu_count(self):
+        """
+        Returns count of cpu on this host
+        """
+        raise NotImplementedError
+
+    def cpu_times(self, cpu_id):
+        """
+        Returns CpuTimes for cpu
+        """
+        raise NotImplementedError
+
+    def cpu_times_shifted(self, cpu_id, shift):
+        """
+        Returns CpuTimes for cpu shifted for shift second from latest collected
+        CpuTimes
         """
         raise NotImplementedError

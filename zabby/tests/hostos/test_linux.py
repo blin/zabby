@@ -5,6 +5,7 @@ from zabby.core.exceptions import OperatingSystemError
 from zabby.core.six import integer_types, string_types
 from zabby.hostos import (detect_host_os, NetworkInterfaceInfo, ProcessInfo,
                           DiskDeviceStats)
+from zabby.hostos.collectors import DiskDeviceStatsCollector
 from zabby.tests import assert_is_instance, assert_less, assert_in
 
 
@@ -106,3 +107,14 @@ class TestLinux():
 
         for key, value in disk_device_stats._asdict().items():
             assert_is_instance(value, integer_types)
+
+
+@attr(os='linux')
+class TestLinuxCollectors():
+    def setup(self):
+        from zabby.hostos.linux import Linux
+        self.linux = Linux()
+
+    def test_disk_device_collector_collection(self):
+        collector = DiskDeviceStatsCollector(5, 1, self.linux)
+        collector._collect()

@@ -142,3 +142,10 @@ class HostOS(object):
         Returns DiskDeviceStats for device
         """
         raise NotImplementedError
+
+    def disk_device_stats_shifted(self, device, shift, now):
+        """
+        Returns DiskDeviceStats for device shifted for shift seconds from now
+        and timestamp for when this stats were taken
+        """
+        raise NotImplementedError

@@ -15,4 +15,6 @@ items = {
     'proc.num': proc.num,
 
     'vm.memory.size': vm.memory.size,
+
+    'vfs.dev.read': vfs.dev.read,
 }

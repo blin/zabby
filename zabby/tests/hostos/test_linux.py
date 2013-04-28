@@ -1,3 +1,5 @@
+import time
+
 from nose.plugins.attrib import attr
 from nose.tools import assert_raises
 
@@ -5,7 +7,6 @@ from zabby.core.exceptions import OperatingSystemError
 from zabby.core.six import integer_types, string_types
 from zabby.hostos import (detect_host_os, NetworkInterfaceInfo, ProcessInfo,
                           DiskDeviceStats)
-from zabby.hostos.collectors import DiskDeviceStatsCollector
 from zabby.tests import assert_is_instance, assert_less, assert_in
 
 
@@ -17,6 +18,7 @@ PRESENT_INTERFACE = 'lo'
 class TestLinux():
     def setup(self):
         from zabby.hostos.linux import Linux
+
         self.linux = Linux()
 
     def test_linux_is_detected_correctly(self):
@@ -113,8 +115,14 @@ class TestLinux():
 class TestLinuxCollectors():
     def setup(self):
         from zabby.hostos.linux import Linux
+
         self.linux = Linux()
 
     def test_disk_device_collector_collection(self):
-        collector = DiskDeviceStatsCollector(5, 1, self.linux)
-        collector._collect()
+        self.linux._disk_device_stats_collector._collect()
+
+        devices = self.linux.disk_device_names()
+        now = int(time.time())
+        (stats, timestamp) = self.linux.disk_device_stats_shifted(devices.pop(),
+                                                                  60, now)
+        assert_is_instance(stats, DiskDeviceStats)

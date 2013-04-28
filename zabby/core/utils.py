@@ -115,3 +115,9 @@ def to_bytes(value, factor):
     validate_mode(factor, BYTE_SCALE.keys())
 
     return int(value) * BYTE_SCALE[factor]
+
+AVERAGE_MODE = {
+    'avg1': 60,
+    'avg5': 300,
+    'avg15': 900,
+}

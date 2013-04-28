@@ -7,6 +7,7 @@ from zabby.core.utils import (lists_from_file, lines_from_file, dict_from_file,
                               to_bytes)
 from zabby.hostos import (HostOS, NetworkInterfaceInfo, ProcessInfo,
                           DiskDeviceStats)
+from zabby.hostos.collectors import DiskDeviceStatsCollector
 
 _libc = cdll.LoadLibrary("libc.so.6")
 
@@ -45,6 +46,12 @@ class Linux(HostOS):
         'pused',
     ])
     AVAILABLE_DISK_DEVICE_STATS_TYPES = set(['sectors', 'operations'])
+
+    def __init__(self):
+        super(Linux, self).__init__()
+        self._disk_device_stats_collector = DiskDeviceStatsCollector(900, 1,
+                                                                     self)
+        self._collectors.append(self._disk_device_stats_collector)
 
     def fs_size(self, filesystem):
         """
@@ -232,3 +239,9 @@ class Linux(HostOS):
             )
             diskstats[device] = diskstat
         return diskstats
+
+    def disk_device_stats_shifted(self, device, shift, now):
+        """
+        Obtains information from DiskDeviceStatsCollector
+        """
+        return self._disk_device_stats_collector.get_stats(device, shift, now)

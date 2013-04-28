@@ -1,7 +1,7 @@
 from mock import Mock
-from nose.tools import assert_raises
+from nose.tools import assert_raises, assert_equal
 from zabby.core.exceptions import WrongArgumentError
-from zabby.tests import assert_less_equal
+from zabby.tests import assert_less_equal, assert_is_instance
 
 from zabby.hostos import DiskDeviceStats
 from zabby.items.vfs import dev
@@ -18,6 +18,15 @@ class TestRead():
             )
         self.host_os.disk_device_stats.side_effect = (
             lambda x: disk_devices_stats[x])
+
+        def smaller_diskstat(device, shift, now):
+            stats = self.host_os.disk_device_stats(device)
+            smaller_stats = stats._replace(
+                read_operations=stats.read_operations - 100,
+                write_operations=stats.write_operations - 100)
+            return smaller_stats, 1
+        self.host_os.disk_device_stats_shifted.side_effect = smaller_diskstat
+
         self.host_os.disk_device_names.return_value = set(
             disk_devices_stats.keys())
         self.host_os.AVAILABLE_DISK_DEVICE_STATS_TYPES = set(['operations'])
@@ -44,3 +53,17 @@ class TestRead():
 
         for result in results:
             assert_less_equal(result, all_result)
+
+    def test_raises_exception_if_mode_if_unknown(self):
+        assert_raises(WrongArgumentError, dev.read, mode='wrong',
+                      host_os=self.host_os)
+
+    def test_stats_per_second_returns_float(self):
+        result = dev.read(stat_type='ops', host_os=self.host_os)
+        assert_is_instance(result, float)
+
+    def test_stats_per_second_returns_zero_if_history_is_empty(self):
+        self.host_os.disk_device_stats_shifted.side_effect = None
+        self.host_os.disk_device_stats_shifted.return_value = (None, None)
+        result = dev.read(stat_type='ops', host_os=self.host_os)
+        assert_equal(0, result)

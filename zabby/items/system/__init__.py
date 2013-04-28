@@ -26,3 +26,12 @@ def uname(host_os=detect_host_os()):
     :depends on: [host_os.uname]
     """
     return " ".join(host_os.uname())
+
+
+def uptime(host_os=detect_host_os()):
+    """
+    Returns system uptime in seconds.
+
+    :depends on: [host_os.uptime]
+    """
+    return host_os.uptime()

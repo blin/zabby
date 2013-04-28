@@ -23,4 +23,5 @@ items = {
 
     'system.hostname': system.hostname,
     'system.uname': system.uname,
+    'system.uptime': system.uptime,
 }

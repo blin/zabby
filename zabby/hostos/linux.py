@@ -296,3 +296,11 @@ class Linux(HostOS):
         Obtains information from python os.uname()
         """
         return os.uname()
+
+    def uptime(self):
+        """
+        Obtains information from /proc/uptime
+
+        See `man 5 proc` for more information
+        """
+        return int(float(lists_from_file('/proc/uptime')[0][0]))

@@ -130,6 +130,10 @@ class TestLinux():
         uname = self.linux.uname()
         assert_is_instance(uname, collections.Iterable)
 
+    def test_uptime(self):
+        uptime = self.linux.uptime()
+        assert_is_instance(uptime, integer_types)
+
 
 @attr(os='linux')
 class TestLinuxCollectors():

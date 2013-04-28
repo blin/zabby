@@ -186,3 +186,9 @@ class HostOS(object):
         Returns information about system running on this host
         """
         raise NotImplementedError
+
+    def uptime(self):
+        """
+        Returns system uptime in seconds.
+        """
+        raise NotImplementedError

@@ -1,3 +1,19 @@
 from . import cpu
+from zabby.core.utils import validate_mode
 
-__all__ = ['cpu', ]
+from zabby.hostos import detect_host_os
+
+__all__ = ['cpu', 'hostname', ]
+
+
+def hostname(hostname_type='host', host_os=detect_host_os()):
+    """
+    Returns host name.
+
+    :raises: WrongArgumentError if unknown hostname_type is supplied
+
+    :depends on: [host_os.hostname, host_os.AVAILABLE_HOSTNAME_TYPES]
+    """
+    validate_mode(hostname_type, host_os.AVAILABLE_HOSTNAME_TYPES)
+
+    return host_os.hostname(hostname_type)

@@ -20,4 +20,6 @@ items = {
     'vfs.dev.write': vfs.dev.write,
 
     'system.cpu.util': system.cpu.util,
+
+    'system.hostname': system.hostname,
 }

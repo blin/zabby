@@ -65,6 +65,7 @@ class HostOS(object):
 
     AVAILABLE_MEMORY_TYPES = set()
     AVAILABLE_DISK_DEVICE_STATS_TYPES = set()
+    AVAILABLE_HOSTNAME_TYPES = set(['host'])
 
     def __init__(self):
         self._collectors = list()
@@ -169,5 +170,13 @@ class HostOS(object):
         """
         Returns CpuTimes for cpu shifted for shift second from latest collected
         CpuTimes
+        """
+        raise NotImplementedError
+
+    def hostname(self, hostname_type):
+        """
+        Returns hostname conforming to hostname_type
+
+        :param hostname_type: should be one of AVAILABLE_HOSTNAME_TYPES
         """
         raise NotImplementedError

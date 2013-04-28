@@ -1,5 +1,6 @@
 import os
 from ctypes import (cdll, Structure, POINTER, c_int, c_char_p)
+import socket
 
 from zabby.core.exceptions import OperatingSystemError
 from zabby.core.six import b
@@ -281,3 +282,11 @@ class Linux(HostOS):
         Obtains information from CpuTimesCollector
         """
         return self._cpu_times_collector.get_times(cpu_id, shift)
+
+    def hostname(self, hostname_type):
+        """
+        Obtains information from python socket.gethostname()
+
+        :param hostname_type: is ignored
+        """
+        return socket.gethostname()

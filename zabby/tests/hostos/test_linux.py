@@ -121,6 +121,10 @@ class TestLinux():
 
         assert_is_instance(cpu_times, CpuTimes)
 
+    def test_hostname(self):
+        hostname = self.linux.hostname('host')
+        assert_is_instance(hostname, string_types)
+
 
 @attr(os='linux')
 class TestLinuxCollectors():

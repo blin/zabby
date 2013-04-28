@@ -1,6 +1,6 @@
 from zabby import __version__
 
-from zabby.items import vfs, net, proc, vm
+from zabby.items import vfs, net, proc, vm, system
 
 items = {
     'agent.ping': lambda: 1,
@@ -18,4 +18,6 @@ items = {
 
     'vfs.dev.read': vfs.dev.read,
     'vfs.dev.write': vfs.dev.write,
+
+    'system.cpu.util': system.cpu.util,
 }

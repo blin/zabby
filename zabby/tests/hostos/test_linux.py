@@ -1,3 +1,4 @@
+import collections
 import time
 
 from nose.plugins.attrib import attr
@@ -124,6 +125,10 @@ class TestLinux():
     def test_hostname(self):
         hostname = self.linux.hostname('host')
         assert_is_instance(hostname, string_types)
+
+    def test_uname(self):
+        uname = self.linux.uname()
+        assert_is_instance(uname, collections.Iterable)
 
 
 @attr(os='linux')

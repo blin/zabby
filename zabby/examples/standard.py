@@ -22,4 +22,5 @@ items = {
     'system.cpu.util': system.cpu.util,
 
     'system.hostname': system.hostname,
+    'system.uname': system.uname,
 }

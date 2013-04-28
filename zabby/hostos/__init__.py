@@ -180,3 +180,9 @@ class HostOS(object):
         :param hostname_type: should be one of AVAILABLE_HOSTNAME_TYPES
         """
         raise NotImplementedError
+
+    def uname(self):
+        """
+        Returns information about system running on this host
+        """
+        raise NotImplementedError

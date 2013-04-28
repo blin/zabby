@@ -290,3 +290,9 @@ class Linux(HostOS):
         :param hostname_type: is ignored
         """
         return socket.gethostname()
+
+    def uname(self):
+        """
+        Obtains information from python os.uname()
+        """
+        return os.uname()

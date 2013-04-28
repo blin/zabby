@@ -1,6 +1,6 @@
 from zabby import __version__
 
-from zabby.items import vfs, net, proc, vm, system
+from zabby.items import vfs, net, proc, vm, system, kernel
 
 items = {
     'agent.ping': lambda: 1,
@@ -24,4 +24,6 @@ items = {
     'system.hostname': system.hostname,
     'system.uname': system.uname,
     'system.uptime': system.uptime,
+
+    'kernel.maxproc': kernel.maxproc,
 }

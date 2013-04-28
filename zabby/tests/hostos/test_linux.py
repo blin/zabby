@@ -134,6 +134,10 @@ class TestLinux():
         uptime = self.linux.uptime()
         assert_is_instance(uptime, integer_types)
 
+    def test_max_number_of_running_processes(self):
+        maxproc = self.linux.max_number_of_running_processes()
+        assert_is_instance(maxproc, integer_types)
+
 
 @attr(os='linux')
 class TestLinuxCollectors():

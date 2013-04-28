@@ -304,3 +304,11 @@ class Linux(HostOS):
         See `man 5 proc` for more information
         """
         return int(float(lists_from_file('/proc/uptime')[0][0]))
+
+    def max_number_of_running_processes(self):
+        """
+        Obtains information from /proc/sys/kernel/pid_max
+
+        See `man 5 proc` for more information
+        """
+        return int(lines_from_file("/proc/sys/kernel/pid_max")[0])

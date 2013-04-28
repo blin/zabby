@@ -192,3 +192,9 @@ class HostOS(object):
         Returns system uptime in seconds.
         """
         raise NotImplementedError
+
+    def max_number_of_running_processes(self):
+        """
+        Returns maximum number of running processes
+        """
+        raise NotImplementedError

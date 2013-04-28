@@ -17,4 +17,5 @@ items = {
     'vm.memory.size': vm.memory.size,
 
     'vfs.dev.read': vfs.dev.read,
+    'vfs.dev.write': vfs.dev.write,
 }

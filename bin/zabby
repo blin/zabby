@@ -13,7 +13,7 @@ from zabby.agent import (DataSource, KeyParser, AgentRequestHandler,
                          set_data_source, set_protocol, ZBXDProtocol)
 from zabby.config_manager import ConfigManager, ModuleLoader
 
-logging.basicConfig()
+LOG = logging.getLogger(__name__)
 
 option_parser = optparse.OptionParser()
 
@@ -51,10 +51,14 @@ def shutdown_handler(signal, frame):
     shutdown.set()
 
 
+def reload_handler(signal, frame):
+    LOG.info('Got SIGHUP, reloading config')
+    config_manager.update_config()
+
 signal.signal(signal.SIGINT, shutdown_handler)
 signal.signal(signal.SIGTERM, shutdown_handler)
 
+signal.signal(signal.SIGHUP, reload_handler)
+
 while not shutdown.is_set():
-    print("Waiting for signal")
     signal.pause()
-    print("Got signal")

@@ -1,5 +1,6 @@
 import imp
 import logging
+import logging.config
 from zabby.core.exceptions import ConfigurationError
 from zabby.core.six import string_types, integer_types
 
@@ -21,6 +22,8 @@ class ConfigManager:
         """
         try:
             self._config = self._config_loader.load(self._config_path)
+            logging.config.fileConfig(self._config.logging_conf,
+                                      disable_existing_loggers=False)
             self._set_listen_address()
             self._load_items()
         except (AttributeError, IOError, SyntaxError) as e:

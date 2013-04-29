@@ -1,6 +1,6 @@
 import os
 import shutil
-from mock import Mock
+from mock import Mock, patch, ANY
 from nose.tools import assert_raises, assert_equal
 
 from zabby.tests import assert_is_instance
@@ -22,6 +22,12 @@ class TestConfigManager():
         self.config_module.listen_port = 10050
         self.config_module.item_files = list()
 
+        self._patcher = patch('logging.config')
+        self.mock_logging_conf = self._patcher.start()
+
+        self.config_module.logging_conf = os.path.join(CONFIG_DIR,
+                                                       'logging.conf')
+
         self.modules = {CONFIG_PATH: self.config_module}
 
         for i in range(2):
@@ -38,6 +44,9 @@ class TestConfigManager():
         self.config_loader = Mock()
         self.config_loader.load.side_effect = return_module
         self.config_manager = ConfigManager(CONFIG_PATH, self.config_loader)
+
+    def teardown(self):
+        self._patcher.stop()
 
     def test_update_config_loads_config_file(self):
         self.config_manager.update_config()
@@ -69,6 +78,11 @@ class TestConfigManager():
             self.config_loader.load.assert_any_call(module_path)
             for item_key, item_value in module.items.items():
                 assert_equal(self.config_manager.items[item_key], item_value)
+
+    def test_configures_logging(self):
+        self.config_manager.update_config()
+        self.mock_logging_conf.fileConfig.assert_called_once_with(
+            ANY, disable_existing_loggers=False)
 
 
 class TestModuleLoader():

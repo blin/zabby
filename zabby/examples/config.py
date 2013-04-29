@@ -6,3 +6,5 @@ listen_port = 10050
 _config_dir = os.path.dirname(os.path.abspath(__file__))
 
 item_files = [os.path.join(_config_dir, 'standard.py'), ]
+
+logging_conf = os.path.join(_config_dir, 'logging.conf')

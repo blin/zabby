@@ -14,6 +14,9 @@ CONFIG_PATH = os.path.join(CONFIG_DIR, 'config.py')
 
 ITEMS_DIR = os.path.join(CONFIG_DIR, 'items')
 
+OVERRIDDEN_KEY = 'override_me'
+ITEM_MODULES_COUNT = 2
+
 
 class TestConfigManager():
     def setup(self):
@@ -30,9 +33,9 @@ class TestConfigManager():
 
         self.modules = {CONFIG_PATH: self.config_module}
 
-        for i in range(2):
+        for i in range(ITEM_MODULES_COUNT):
             item_module = Mock()
-            item_module.items = {str(i): lambda: i}
+            item_module.items = {str(i): lambda: i, OVERRIDDEN_KEY: lambda: i}
 
             item_module_path = os.path.join(ITEMS_DIR, "{0}.py".format(i))
             self.config_module.item_files.append(item_module_path)
@@ -77,7 +80,14 @@ class TestConfigManager():
 
             self.config_loader.load.assert_any_call(module_path)
             for item_key, item_value in module.items.items():
+                if item_key == OVERRIDDEN_KEY:
+                    continue
                 assert_equal(self.config_manager.items[item_key], item_value)
+
+    def test_overrides_item_definitions(self):
+        self.config_manager.update_config()
+        assert_equal(ITEM_MODULES_COUNT - 1,
+                     self.config_manager.items[OVERRIDDEN_KEY]())
 
     def test_configures_logging(self):
         self.config_manager.update_config()

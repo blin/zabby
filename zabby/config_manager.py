@@ -44,6 +44,7 @@ class ConfigManager:
     def _load_items(self):
         items = dict()
         for item_file in self._config.item_files:
+            LOG.debug("Loading items from {0}".format(item_file))
             item_module = self._config_loader.load(item_file)
             self._check_type(item_module.items, dict)
             items.update(item_module.items)

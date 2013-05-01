@@ -45,6 +45,13 @@ Than you can look at zabby/hostos/${YOUR_OS}.py and even import it and call the 
 Turns out, the problem is somewhere on a kernel level
 (in my case, i had an outdated kernel that didn't support inode counting on NFS).
 
+Differences from zabbix agent
+-----------------------------
+You can not specify later item arguments if you specify former.
+
+system.cpu.util[,idle] will be treated as system.cpu.util(cpu='', state='idle', mode='avg1') and you probably don't have ''th cpu.
+
+You should pass 'all processes' and 'all users' to proc.num explicitly, proc[,root] should be proc[all processes,root]
 
 Testing
 -------

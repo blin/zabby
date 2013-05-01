@@ -6,9 +6,11 @@ from zabby.core.utils import validate_mode
 __all__ = ['num', ]
 
 PROC_NUM_MODES = ['all', 'run', 'sleep', 'zomb']
+ALL_PROCESSES = 'all processes'
+ALL_USERS = 'all users'
 
 
-def num(name=None, user=None, state='all', cmdline=None,
+def num(name=ALL_PROCESSES, user=ALL_USERS, state='all', cmdline=None,
         host_os=detect_host_os()):
     """
     Returns number of userspace processes matching filter
@@ -20,7 +22,7 @@ def num(name=None, user=None, state='all', cmdline=None,
     validate_mode(state, PROC_NUM_MODES)
 
     uid = None
-    if user is not None:
+    if user != ALL_USERS:
         uid = host_os.uid(user)
 
     number_of_processes = 0
@@ -32,7 +34,7 @@ def num(name=None, user=None, state='all', cmdline=None,
 
 
 def _matches_filter(process_info, name, uid, state, cmdline):
-    matches_name = True if name is None else process_info.name == name
+    matches_name = True if name == ALL_PROCESSES else process_info.name == name
     matches_user = True if uid is None else process_info.uid == uid
     matches_state = True if state == 'all' else process_info.state == state
     matches_cmdline = (True

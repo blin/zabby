@@ -44,6 +44,10 @@ def get_data_source():
     return __DATA_SOURCE__
 
 
+class AgentServer(socketserver.TCPServer):
+    allow_reuse_address = True
+
+
 class AgentRequestHandler(socketserver.BaseRequestHandler):
     """
     This class is a proxy for protocol interaction and data retrieval
@@ -131,7 +135,10 @@ class DataSource:
                     key=key, arguments=arguments))
             LOG.warning(e)
         except Exception as e:
-            LOG.error("Unexpected exception: {0}".format(e))
+            LOG.error(
+                "When calling function for '{key}' with {arguments}".format(
+                    key=key, arguments=arguments))
+            LOG.error("Unexpected exception occurred: {0}".format(e))
 
         return value
 

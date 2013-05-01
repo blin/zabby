@@ -1,34 +1,21 @@
 #!/usr/bin/python
-try:
-    import socketserver
-except ImportError:
-    import SocketServer as socketserver
 import threading
 import signal
 import logging
-import optparse
 
 from zabby.hostos import detect_host_os
 from zabby.agent import (DataSource, KeyParser, AgentRequestHandler,
-                         set_data_source, set_protocol, ZBXDProtocol)
+                         set_data_source, set_protocol, ZBXDProtocol,
+                         AgentServer)
 from zabby.config_manager import ConfigManager, ModuleLoader
+from zabby.cli import option_parser, daemonize
 
 LOG = logging.getLogger(__name__)
 
-option_parser = optparse.OptionParser()
-
-option_parser.add_option(
-    '-c', '--config',
-    help='Absolute path to configuration file',
-    default='/etc/pyzabbix/agent_configuration.py'
-)
-
 options, _ = option_parser.parse_args()
 
-
-class Server(socketserver.TCPServer):
-    allow_reuse_address = True
-
+if options.daemonize:
+    daemonize(options.pid_file)
 
 config_manager = ConfigManager(options.config, ModuleLoader())
 config_manager.update_config()
@@ -36,17 +23,18 @@ config_manager.update_config()
 set_data_source(DataSource(KeyParser(), config_manager))
 set_protocol(ZBXDProtocol())
 
-agent = Server(config_manager.listen_address, AgentRequestHandler)
+server = AgentServer(config_manager.listen_address, AgentRequestHandler)
+
 host_os = detect_host_os()
 host_os.start_collectors()
 
-threading.Thread(target=agent.serve_forever).start()
+threading.Thread(target=server.serve_forever).start()
 
 shutdown = threading.Event()
 
 
 def shutdown_handler(signal, frame):
-    agent.shutdown()
+    server.shutdown()
     host_os.stop_collectors()
     shutdown.set()
 
@@ -54,6 +42,7 @@ def shutdown_handler(signal, frame):
 def reload_handler(signal, frame):
     LOG.info('Got SIGHUP, reloading config')
     config_manager.update_config()
+
 
 signal.signal(signal.SIGINT, shutdown_handler)
 signal.signal(signal.SIGTERM, shutdown_handler)

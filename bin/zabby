@@ -3,6 +3,7 @@ import threading
 import signal
 import logging
 
+from zabby import __version__
 from zabby.hostos import detect_host_os
 from zabby.agent import (DataSource, KeyParser, AgentRequestHandler,
                          set_data_source, set_protocol, ZBXDProtocol,
@@ -49,5 +50,7 @@ signal.signal(signal.SIGTERM, shutdown_handler)
 
 signal.signal(signal.SIGHUP, reload_handler)
 
+LOG.info("Started zabby {0}".format(__version__))
 while not shutdown.is_set():
     signal.pause()
+LOG.info('Stopped')

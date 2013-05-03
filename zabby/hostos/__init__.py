@@ -218,3 +218,12 @@ class HostOS(object):
         Returns SystemLoad
         """
         raise NotImplementedError
+
+    def swap_size(self, device):
+        """
+        Get information about free and total swap space on a device
+
+        :param device:
+        :rtype : (int, int)
+        """
+        raise NotImplementedError

@@ -1,5 +1,6 @@
 import os
-from ctypes import (cdll, Structure, POINTER, c_int, c_char_p)
+from ctypes import (cdll, Structure, POINTER, c_int, c_char_p, c_long, c_ulong,
+                    c_ushort, c_uint, c_char, byref)
 import socket
 
 from zabby.core.exceptions import OperatingSystemError
@@ -27,6 +28,26 @@ class StructPasswd(Structure):
 
 _libc.getpwnam.argtypes = [c_char_p]
 _libc.getpwnam.restype = POINTER(StructPasswd)
+
+
+class StructSysinfo(Structure):
+    _fields_ = [
+        ("uptime", c_long),
+        ("loads", c_ulong * 3),
+        ("totalram", c_ulong),
+        ("freeram", c_ulong),
+        ("sharedram", c_ulong),
+        ("bufferram", c_ulong),
+        ("totalswap", c_ulong),
+        ("freeswap", c_ulong),
+        ("procs", c_ushort),
+        ("totalhigh", c_ulong),
+        ("freehigh", c_ulong),
+        ("mem_unit", c_uint),
+        ('__padding', c_char * 64),
+    ]
+
+_libc.sysinfo.argtypes = [POINTER(StructSysinfo)]
 
 PROCESS_STATE_MAP = {
     "R (running)": "run",
@@ -318,3 +339,17 @@ class Linux(HostOS):
         Obtains information from python os.getloadavg()
         """
         return SystemLoad(*os.getloadavg())
+
+    def swap_size(self, device):
+        """
+        Obtains information from sysinfo system call
+
+        See `man 2 sysinfo` for more information
+
+        :param device: ignored, always returns system wide information
+        """
+        sysinfo_struct = StructSysinfo()
+        _libc.sysinfo(byref(sysinfo_struct))
+
+        return (sysinfo_struct.freeswap * sysinfo_struct.mem_unit,
+                sysinfo_struct.totalswap * sysinfo_struct.mem_unit)

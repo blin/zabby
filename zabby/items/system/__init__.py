@@ -1,9 +1,10 @@
 from . import cpu
+from . import swap
 from zabby.core.utils import validate_mode
 
 from zabby.hostos import detect_host_os
 
-__all__ = ['cpu', 'hostname', 'uname', ]
+__all__ = ['cpu', 'hostname', 'uname', 'swap', ]
 
 
 def hostname(hostname_type='host', host_os=detect_host_os()):

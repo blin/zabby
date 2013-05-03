@@ -8,7 +8,8 @@ from zabby.core.exceptions import OperatingSystemError
 from zabby.core.six import integer_types, string_types
 from zabby.hostos import (detect_host_os, NetworkInterfaceInfo, ProcessInfo,
                           DiskDeviceStats, CpuTimes, SystemLoad)
-from zabby.tests import assert_is_instance, assert_less, assert_in
+from zabby.tests import (assert_is_instance, assert_less, assert_in,
+                         assert_less_equal)
 
 
 PRESENT_FILESYSTEM = '/'
@@ -29,18 +30,12 @@ class TestLinux():
     def test_fs_size_returns_tuple_of_integers_one_less_than_other(self):
         free, total = self.linux.fs_size(PRESENT_FILESYSTEM)
 
-        assert_is_instance(free, integer_types)
-        assert_is_instance(total, integer_types)
-
-        assert_less(free, total)
+        assert_less_equal(free, total)
 
     def test_fs_inodes_returns_tuple_of_integers_one_less_than_other(self):
         free, total = self.linux.fs_inodes(PRESENT_FILESYSTEM)
 
-        assert_is_instance(free, integer_types)
-        assert_is_instance(total, integer_types)
-
-        assert_less(free, total)
+        assert_less_equal(free, total)
 
     def test_net_interface_names_returns_set_of_strings(self):
         interface_names = self.linux.net_interface_names()
@@ -141,6 +136,11 @@ class TestLinux():
     def test_system_load(self):
         system_load = self.linux.system_load()
         assert_is_instance(system_load, SystemLoad)
+
+    def test_swap_size(self):
+        free, total = self.linux.swap_size('all')
+
+        assert_less_equal(free, total)
 
 
 @attr(os='linux')

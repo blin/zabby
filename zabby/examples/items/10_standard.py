@@ -27,6 +27,7 @@ items = {
     'system.uptime': system.uptime,
 
     'system.swap.size': system.swap.size,
+    'system.swap.in': system.swap.into_memory,
 
     'kernel.maxproc': kernel.maxproc,
 }

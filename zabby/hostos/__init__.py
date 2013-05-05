@@ -57,6 +57,8 @@ CpuTimes = namedtuple('CpuTimes', CPU_TIMES)
 
 SystemLoad = namedtuple('SystemLoad', list(AVERAGE_MODE.keys()))
 
+SwapInfo = namedtuple('SwapInfo', ['read', 'write', ])
+
 
 class HostOS(object):
     """
@@ -225,5 +227,11 @@ class HostOS(object):
 
         :param device:
         :rtype : (int, int)
+        """
+        raise NotImplementedError
+
+    def swap_info(self):
+        """
+        Returns SwapInfo
         """
         raise NotImplementedError

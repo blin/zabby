@@ -7,7 +7,7 @@ from nose.tools import assert_raises
 from zabby.core.exceptions import OperatingSystemError
 from zabby.core.six import integer_types, string_types
 from zabby.hostos import (detect_host_os, NetworkInterfaceInfo, ProcessInfo,
-                          DiskDeviceStats, CpuTimes, SystemLoad)
+                          DiskDeviceStats, CpuTimes, SystemLoad, SwapInfo)
 from zabby.tests import (assert_is_instance, assert_less, assert_in,
                          assert_less_equal)
 
@@ -141,6 +141,10 @@ class TestLinux():
         free, total = self.linux.swap_size('all')
 
         assert_less_equal(free, total)
+
+    def test_swap_info(self):
+        swap_info = self.linux.swap_info()
+        assert_is_instance(swap_info, SwapInfo)
 
 
 @attr(os='linux')

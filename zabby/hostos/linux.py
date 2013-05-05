@@ -8,7 +8,7 @@ from zabby.core.six import b
 from zabby.core.utils import (lists_from_file, lines_from_file, dict_from_file,
                               to_bytes)
 from zabby.hostos import (HostOS, NetworkInterfaceInfo, ProcessInfo,
-                          DiskDeviceStats, CpuTimes, SystemLoad)
+                          DiskDeviceStats, CpuTimes, SystemLoad, SwapInfo)
 from zabby.hostos.collectors import DiskDeviceStatsCollector, CpuTimesCollector
 
 _libc = cdll.LoadLibrary("libc.so.6")
@@ -353,3 +353,14 @@ class Linux(HostOS):
 
         return (sysinfo_struct.freeswap * sysinfo_struct.mem_unit,
                 sysinfo_struct.totalswap * sysinfo_struct.mem_unit)
+
+    def swap_info(self):
+        """
+        Obtains information from /proc/vmstat
+
+        See `man 5 proc` for more information
+        """
+        vmstat = dict_from_file('/proc/vmstat')
+
+        return SwapInfo(read=int(vmstat['pswpin']),
+                        write=int(vmstat['pswpout']))

@@ -1,5 +1,5 @@
 from mock import Mock
-from nose.tools import istest, assert_raises
+from nose.tools import istest, assert_raises, nottest
 from zabby.core.exceptions import WrongArgumentError
 from zabby.core.six import integer_types
 from zabby.items.system.swap import SWAP_TO_DISK_DEVICE_STAT
@@ -23,8 +23,9 @@ class TestSwapSize(TestSizeFunction):
         self.target = SWAP_DEVICE
 
 
-class TestSwapIntoMemory():
-    def setup(self):
+@nottest
+class TestIntoOutOf():
+    def _common_setup(self):
         self.host_os = Mock()
         self.host_os.swap_info.return_value = SwapInfo(read=10153, write=25087)
         self.host_os.AVAILABLE_DISK_DEVICE_STATS_TYPES = set(['sectors',
@@ -36,33 +37,49 @@ class TestSwapIntoMemory():
         )
 
     def test_raises_exception_when_trying_to_use_pages_without_all(self):
-        assert_raises(WrongArgumentError, swap.into_memory, device=SWAP_DEVICE,
-                      mode='pages', host_os=self.host_os)
+        assert_raises(WrongArgumentError, self.function_under_test,
+                      device=SWAP_DEVICE, mode='pages', host_os=self.host_os)
 
     def test_pages_returns_integer(self):
-        result = swap.into_memory(mode='pages', host_os=self.host_os)
+        result = self.function_under_test(mode='pages', host_os=self.host_os)
 
         assert_is_instance(result, integer_types)
 
     def test_raises_exception_for_unknown_mode(self):
-        assert_raises(WrongArgumentError, swap.into_memory, mode='wrong',
+        assert_raises(WrongArgumentError, self.function_under_test,
+                      mode='wrong',
                       host_os=self.host_os)
 
     def test_raises_exception_for_known_unavailable_mode(self):
         unavailable_mode = 'sectors'
         self.host_os.AVAILABLE_DISK_DEVICE_STATS_TYPES.remove(unavailable_mode)
-        assert_raises(WrongArgumentError, swap.into_memory,
+        assert_raises(WrongArgumentError, self.function_under_test,
                       mode=unavailable_mode, host_os=self.host_os)
 
     def test_raises_exception_for_unknown_device(self):
         self.host_os.swap_device_names.return_value = set()
-        assert_raises(WrongArgumentError, swap.into_memory, device=SWAP_DEVICE,
+        assert_raises(WrongArgumentError, self.function_under_test,
+                      device=SWAP_DEVICE,
                       host_os=self.host_os)
 
     def test_does_not_raise_exception_for_device_all(self):
-        swap.into_memory(device=SWAP_DEVICE, host_os=self.host_os)
+        self.function_under_test(device=SWAP_DEVICE, host_os=self.host_os)
 
     def test_disk_device_stat_types_returns_integer(self):
         for mode in SWAP_TO_DISK_DEVICE_STAT.keys():
-            result = swap.into_memory(mode=mode, host_os=self.host_os)
+            result = self.function_under_test(mode=mode, host_os=self.host_os)
             assert_is_instance(result, integer_types)
+
+
+@istest
+class TestSwapIntoMemory(TestIntoOutOf):
+    def setup(self):
+        self._common_setup()
+        self.function_under_test = swap.into_memory
+
+
+@istest
+class TestSwapOutOfMemory(TestIntoOutOf):
+    def setup(self):
+        self._common_setup()
+        self.function_under_test = swap.out_of_memory

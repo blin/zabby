@@ -2,7 +2,7 @@ from zabby.core.exceptions import WrongArgumentError
 from zabby.core.utils import convert_size, SIZE_CONVERSION_MODES, validate_mode
 from zabby.hostos import detect_host_os
 
-__all__ = ['size', 'into_memory', ]
+__all__ = ['size', 'into_memory', 'out_of_memory', ]
 
 
 def size(device='all', mode='free', host_os=detect_host_os()):
@@ -40,18 +40,43 @@ def into_memory(device='all', mode='count', host_os=detect_host_os()):
         host_os.disk_device_stats,
     ]
     """
+    return into_out_of('read', device, mode, host_os)
+
+
+def out_of_memory(device='all', mode='count', host_os=detect_host_os()):
+    """
+    Returns total number of pages written to swap or total number of write
+    operations or sectors written to swap device
+
+    :param mode: should be one of {'count', 'pages', 'sectors'}
+
+    :raises: WrongArgumentError if mode is pages and device is not 'all'
+    :raises: WrongArgumentError if mode is unknown
+    :raises: WrongArgumentError if mode is unavailable on this host_os
+
+    :depends on: [
+        host_os.swap_info,
+        host_os.AVAILABLE_DISK_DEVICE_STATS_TYPES,
+        host_os.swap_device_names,
+        host_os.disk_device_stats,
+    ]
+    """
+    return into_out_of('write', device, mode, host_os)
+
+
+def into_out_of(direction, device, mode, host_os):
     if mode == 'pages':
         if device != 'all':
             raise WrongArgumentError(
                 'Swapped pages info per device is not available')
         swap_info = host_os.swap_info()
-        result = swap_info._asdict()['read']
+        result = swap_info._asdict()[direction]
     else:
         validate_mode(mode, SWAP_TO_DISK_DEVICE_STAT.keys())
         disk_device_stat_type = SWAP_TO_DISK_DEVICE_STAT[mode]
         validate_mode(disk_device_stat_type,
                       host_os.AVAILABLE_DISK_DEVICE_STATS_TYPES)
-        disk_device_stat = "{0}_{1}".format('read',
+        disk_device_stat = "{0}_{1}".format(direction,
                                             disk_device_stat_type)
         device_names = host_os.swap_device_names()
         if device != 'all':

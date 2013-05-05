@@ -28,6 +28,7 @@ items = {
 
     'system.swap.size': system.swap.size,
     'system.swap.in': system.swap.into_memory,
+    'system.swap.out': system.swap.out_of_memory,
 
     'kernel.maxproc': kernel.maxproc,
 }

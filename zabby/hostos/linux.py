@@ -47,6 +47,7 @@ class StructSysinfo(Structure):
         ('__padding', c_char * 64),
     ]
 
+
 _libc.sysinfo.argtypes = [POINTER(StructSysinfo)]
 
 PROCESS_STATE_MAP = {
@@ -364,3 +365,19 @@ class Linux(HostOS):
 
         return SwapInfo(read=int(vmstat['pswpin']),
                         write=int(vmstat['pswpout']))
+
+    def swap_device_names(self):
+        """
+        Obtains information from /proc/swaps
+
+        See `man 5 proc` for more information
+        """
+        swaps = lists_from_file('/proc/swaps')
+
+        devices = set()
+        for swap in swaps[1:]:  # skip header
+            device_path = swap[0]
+            device = device_path.split('/')[-1]
+            devices.add(device)
+
+        return devices

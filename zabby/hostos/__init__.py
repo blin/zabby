@@ -68,6 +68,7 @@ class HostOS(object):
     Different data extraction operations may be enabled by implementing these
     methods
     """
+
     def __init__(self):
         self._collectors = list()
 
@@ -233,5 +234,15 @@ class HostOS(object):
     def swap_info(self):
         """
         Returns SwapInfo
+        """
+        raise NotImplementedError
+
+    def swap_device_names(self):
+        """
+        Returns a set that contains all swap device names available on this host
+
+        Returned set should be a subset of a set returned by disk_device_names
+
+        :rtype: set
         """
         raise NotImplementedError

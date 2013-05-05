@@ -146,6 +146,12 @@ class TestLinux():
         swap_info = self.linux.swap_info()
         assert_is_instance(swap_info, SwapInfo)
 
+    def test_swap_device_names(self):
+        swap_devices = self.linux.swap_device_names()
+        disk_devices = self.linux.disk_device_names()
+        for swap_device in swap_devices:
+            assert_in(swap_device, disk_devices)
+
 
 @attr(os='linux')
 class TestLinuxCollectors():

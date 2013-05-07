@@ -1,5 +1,7 @@
 from __future__ import division
 from itertools import islice
+import logging
+from subprocess import Popen, PIPE
 
 from zabby.core.exceptions import WrongArgumentError, OperatingSystemError
 
@@ -97,6 +99,7 @@ def dict_from_file(file_path, sep=None):
             d[key] = value
     return d
 
+
 BYTE_SCALE = {
     'kB': 1024,
     'mB': 1024 * 1024,
@@ -116,8 +119,46 @@ def to_bytes(value, factor):
 
     return int(value) * BYTE_SCALE[factor]
 
+
 AVERAGE_MODE = {
     'avg1': 60,
     'avg5': 300,
     'avg15': 900,
 }
+
+
+def sh(command):
+    """
+    Creates and returns a function that when called will run command with shell
+    and return it's output.
+
+    Command can contain replacement fields as described in python documentation
+    http://docs.python.org/library/string.html?highlight=formatter#format-string-syntax
+
+    sh('command {0}')('argument') will call 'command argument'
+
+    Everything written to stderr by command will be logged
+
+    :raises: WrongArgumentError if command contains replacement fields and
+        resulting function is called without arguments
+    """
+
+    def call_command(*args):
+        try:
+            formatted_command = command.format(*args)
+        except IndexError:
+            raise WrongArgumentError(
+                "'{0}' not enough arguments. Called with {1}".format(command,
+                                                                     args))
+        (out, err) = Popen(formatted_command, stdout=PIPE, stderr=PIPE,
+                           shell=True, universal_newlines=True).communicate()
+
+        if err != '':
+            log = logging.getLogger('sh')
+            log.warn(
+                "'{0}' has written to stderr: {1}".format(formatted_command,
+                                                          err))
+
+        return out.rstrip()
+
+    return call_command

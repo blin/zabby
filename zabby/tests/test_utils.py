@@ -1,13 +1,16 @@
-from nose.tools import assert_raises, assert_equal
+from types import FunctionType
+from mock import patch, Mock, ANY
+from nose.tools import assert_raises, assert_equal, assert_true
 
 from zabby.tests import (assert_is_instance, ensure_removed,
                          ensure_contains_only_formatted_lines,
-                         assert_less_equal, assert_less)
+                         assert_less_equal, assert_less, assert_in)
 from zabby.core import utils
 from zabby.core.exceptions import WrongArgumentError, OperatingSystemError
 from zabby.core.six import integer_types, string_types
 from zabby.core.utils import (SIZE_CONVERSION_MODES, validate_mode,
-                              convert_size, lines_from_file, lists_from_file, dict_from_file, to_bytes)
+                              convert_size, lines_from_file, lists_from_file,
+                              dict_from_file, to_bytes, sh)
 
 
 def test_validate_mode_raises_exception_if_mode_is_not_available():
@@ -99,3 +102,60 @@ class TestToBytes():
     def test_returns_integer(self):
         value = to_bytes(1, 'kB')
         assert_is_instance(value, integer_types)
+
+
+COMMAND = 'command'
+COMMAND_WITH_ARGUMENTS = 'command {0}'
+STDOUT = 'stdout\n'
+STDERR = 'stderr\n'
+ARGUMENT = 'argument'
+
+
+class TestSh():
+    def setup(self):
+        self._patcher = patch('zabby.core.utils.Popen')
+
+        self.process = Mock()
+        self.process.communicate.return_value = (STDOUT, '')
+
+        self.mock_popen = self._patcher.start()
+        self.mock_popen.return_value = self.process
+
+    def teardown(self):
+        self._patcher.stop()
+
+    def test_returns_a_function(self):
+        f = sh(COMMAND)
+        assert_is_instance(f, FunctionType)
+
+    def test_function_runs_command_when_called(self):
+        sh(COMMAND)()
+        command = self.mock_popen.call_args[0][0]
+        assert_equal(command, COMMAND)
+        self.process.communicate.assert_called_once_with()
+
+    def test_command_output_is_returned(self):
+        result = sh(COMMAND)()
+        assert_true(not result.endswith('\n'))
+        assert_in(result, STDOUT)
+
+    @patch('zabby.core.utils.logging')
+    def test_command_errors_are_logged(self, mock_logging):
+        mock_logger = Mock()
+        mock_logging.getLogger.return_value = mock_logger
+        self.process.communicate.return_value = ('', STDERR)
+
+        sh(COMMAND)()
+        mock_logger.warn.assert_called_once_with(ANY)
+
+    def test_function_accepts_arguments(self):
+        sh(COMMAND)(ARGUMENT)
+
+    def test_function_inserts_arguments_into_command(self):
+        sh(COMMAND_WITH_ARGUMENTS)(ARGUMENT)
+        command = self.mock_popen.call_args[0][0]
+        assert_in(ARGUMENT, command)
+
+    def test_calling_command_that_accepts_arguments_without_them(self):
+        f = sh(COMMAND_WITH_ARGUMENTS)
+        assert_raises(WrongArgumentError, f)

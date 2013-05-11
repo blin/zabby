@@ -1,6 +1,6 @@
 from mock import Mock, patch
 from nose.tools import assert_equal
-from zabby.tests import assert_less_equal, assert_is_instance
+from zabby.tests import assert_less_equal, assert_is_instance, FakeThread
 
 from zabby.hostos import HostOS, DiskDeviceStats, CpuTimes, CPU_TIMES
 from zabby.hostos.collectors import DiskDeviceStatsCollector, CpuTimesCollector
@@ -15,6 +15,7 @@ class TestHostOSCollectors():
             self.collectors.append(collector)
             self.host_os._collectors.append(collector)
 
+    @patch('zabby.hostos.threading.Thread', FakeThread)
     def test_start_collectors_runs_every_collector(self):
         self.host_os.start_collectors()
         for collector in self.collectors:

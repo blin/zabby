@@ -44,6 +44,14 @@ def ensure_contains_only_formatted_lines(file_path, line_format, n=1):
         write_to_file(file_path, line_format.format(i))
 
 
+class FakeThread:
+    def __init__(self, target=None):
+        self._target = target
+
+    def start(self):
+        self._target()
+
+
 @nottest
 class TestSizeFunction():
     def test_throws_exception_on_wrong_arguments(self):

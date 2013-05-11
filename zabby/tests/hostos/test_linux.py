@@ -1,8 +1,9 @@
 import collections
 import time
 
+from mock import patch
 from nose.plugins.attrib import attr
-from nose.tools import assert_raises
+from nose.tools import assert_raises, assert_equal
 
 from zabby.core.exceptions import OperatingSystemError
 from zabby.core.six import integer_types, string_types
@@ -66,6 +67,11 @@ class TestLinux():
 
         # at least init should be here
         assert_less(0, len(process_infos))
+
+    @patch('zabby.hostos.linux.os.listdir')
+    def test_process_infos_skips_expired_pids(self, mock_listdir):
+        mock_listdir.return_value = ['0', '1']
+        assert_equal(1, len(list(self.linux.process_infos())))
 
     def test_uid_returns_integer(self):
         uid = self.linux.uid('root')

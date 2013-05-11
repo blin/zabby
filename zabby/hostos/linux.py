@@ -142,28 +142,31 @@ class Linux(HostOS):
         effective UID, state and used memory
         Uses /proc/{pid}/cmdline to obtain information about command line
 
-        {pid} directories are obtained ones by listing all files containing only
+        {pid} directories are obtained once by listing all files containing only
         digits in /proc
 
         See `man 5 proc` for more information
         """
         for process_id in self._process_ids():
             try:
-                command_line = self._process_command_line(process_id)
-            except OperatingSystemError:
-                # kernel threads do not contain command line
-                # we are not interested in them
+                try:
+                    command_line = self._process_command_line(process_id)
+                except OperatingSystemError:
+                    # kernel threads do not contain command line
+                    # we are not interested in them
+                    continue
+
+                status = self._process_status(process_id)
+                yield ProcessInfo(
+                    name=status['Name'],
+                    uid=status['Uid'],
+                    state=status['State'],
+                    command_line=command_line,
+                    used_memory=status['VmSize']
+                )
+            except IOError:
+                # process with process_id no longer exists
                 continue
-
-            status = self._process_status(process_id)
-
-            yield ProcessInfo(
-                name=status['Name'],
-                uid=status['Uid'],
-                state=status['State'],
-                command_line=command_line,
-                used_memory=status['VmSize']
-            )
 
     def _process_ids(self):
         return [dir_name

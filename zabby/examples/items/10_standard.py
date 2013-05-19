@@ -12,6 +12,8 @@ items = {
     'net.if.in': net.interface.incoming,
     'net.if.out': net.interface.outgoing,
 
+    'net.tcp.service': net.tcp.service,
+
     'proc.num': proc.num,
 
     'vm.memory.size': vm.memory.size,

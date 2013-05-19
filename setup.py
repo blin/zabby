@@ -27,7 +27,7 @@ setup(
     author='blin',
     author_email='blin@f4oe.org',
     description='This is a fork of zabbix agent to python',
-    scripts=['bin/zabby', 'bin/zabby_interactive', ],
+    scripts=['bin/zabby', 'bin/zabby_interactive', 'bin/zabby_get', ],
     package_data={
         'zabby': ['examples/config.py', 'examples/logging.conf',
                   'examples/items/*', ]

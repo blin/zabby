@@ -23,7 +23,7 @@ class TestAgentRequestHandler():
 
     def setup(self):
         self.protocol = Mock()
-        self.protocol.receive_key.return_value = KEY
+        self.protocol.receive_value.return_value = KEY
         set_protocol(self.protocol)
 
         self.data_source = Mock()
@@ -32,7 +32,7 @@ class TestAgentRequestHandler():
 
     def test_handle_receives_key(self):
         self.handle()
-        self.protocol.receive_key.assert_called_with(ANY)
+        self.protocol.receive_value.assert_called_with(ANY)
 
     def test_handle_passes_received_key_to_data_source_for_processing(self):
         self.handle()
@@ -40,7 +40,7 @@ class TestAgentRequestHandler():
 
     def test_handle_sends_key_process_result_to_client(self):
         self.handle()
-        self.protocol.send_response.assert_called_with(ANY, KEY_PROCESS_RESULT)
+        self.protocol.send_value.assert_called_with(ANY, KEY_PROCESS_RESULT)
 
 
 class TestProtocol():
@@ -55,26 +55,16 @@ class TestProtocol():
             struct.pack('q', len(sent_key)),
             b(sent_key)
         ]
-        received_key = self.protocol.receive_key(self.client)
+        received_key = self.protocol.receive_value(self.client)
         assert_is_instance(received_key, string_types)
         assert_equal(u(sent_key), received_key)
 
-    def test_receive_key_telnet(self):
-        sent_key = KEY
-        key = b(sent_key)
-        self.client.recv.side_effect = [
-            key[:self.protocol.HEADER_LENGTH],
-            key[self.protocol.HEADER_LENGTH:]
-        ]
-        received_key = self.protocol.receive_key(self.client)
-        assert_equal(u(sent_key), received_key)
-
     def test_send_value(self):
-        self.protocol.send_response(self.client, 1)
+        self.protocol.send_value(self.client, 1)
         self.client.sendall.assert_called_with(ANY)
         assert_is_instance(self.client.sendall.call_args[0][0], bytes)
 
-        self.protocol.send_response(self.client, "1")
+        self.protocol.send_value(self.client, "1")
         self.client.sendall.assert_called_with(ANY)
         assert_is_instance(self.client.sendall.call_args[0][0], bytes)
 

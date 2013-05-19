@@ -60,9 +60,9 @@ class AgentRequestHandler(socketserver.BaseRequestHandler):
         self.data_source = get_data_source()
 
     def handle(self):
-        key = self.protocol.receive_key(self.request)
+        key = self.protocol.receive_value(self.request)
         response = self.data_source.process(key)
-        self.protocol.send_response(self.request, response)
+        self.protocol.send_value(self.request, response)
 
 
 class ZBXDProtocol():
@@ -72,13 +72,12 @@ class ZBXDProtocol():
     EXPECTED_LENGTH_SIZE = 8
     RESPONSE_FORMAT = "<5sq{data_length}s"
 
-    def receive_key(self, client):
+    def receive_value(self, client):
         """
         Receives key and returns it
 
         Expects to receive header followed by the length of the key
-        followed by the key. If header is not received tries to get up to
-        MAX_KEY_LENGTH bytes.
+        followed by the key.
         """
         received = client.recv(self.HEADER_LENGTH)
         if received == self.HEADER:
@@ -87,10 +86,19 @@ class ZBXDProtocol():
             )[0]
             key = client.recv(expected_length)
         else:
-            key = received + client.recv(self.MAX_KEY_LENGTH)
+            raise Exception(
+                "Expected to receive {0}, received {1}".format(self.HEADER,
+                                                               received))
         return key.decode('utf-8')
 
-    def _calculate_response(self, value):
+    def send_value(self, client, value):
+        """
+        Formats value according to protocol and sends it to client
+        """
+        message = self._calculate_message(value)
+        client.sendall(message)
+
+    def _calculate_message(self, value):
         data_length = len(str(value))
         response = struct.pack(
             self.RESPONSE_FORMAT.format(data_length=data_length),
@@ -99,13 +107,6 @@ class ZBXDProtocol():
             b(str(value))
         )
         return response
-
-    def send_response(self, client, value):
-        """
-        Formats value according to protocol and sends it to client
-        """
-        response = self._calculate_response(value)
-        client.sendall(response)
 
 
 class DataSource:

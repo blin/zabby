@@ -1,10 +1,10 @@
 from __future__ import division
-from itertools import islice
-import time
 import socket
 import logging
 from subprocess import Popen, PIPE
 
+from itertools import islice
+import time
 from zabby.core.exceptions import WrongArgumentError, OperatingSystemError
 from zabby.core.six import binary_type
 
@@ -219,3 +219,17 @@ def tcp_communication(port, host='localhost', requests=list(),
             conn.close()
 
     return responses
+
+
+def exception_guard(function, exception_class=Exception, sentinel=0):
+    """
+    Returns a wrapper over function that calls function in a try block
+    if exception_class is raised sentinel value will be returned
+    """
+    def wrapper(*args):
+        try:
+            return function(*args)
+        except exception_class:
+            return sentinel
+
+    return wrapper

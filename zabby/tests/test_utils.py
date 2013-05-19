@@ -1,5 +1,5 @@
 from types import FunctionType
-from mock import patch, Mock, ANY, call
+from mock import patch, Mock, ANY, call, sentinel
 from nose.tools import assert_raises, assert_equal, assert_true, assert_false
 
 from zabby.tests import (assert_is_instance, ensure_removed,
@@ -10,7 +10,8 @@ from zabby.core.exceptions import WrongArgumentError, OperatingSystemError
 from zabby.core.six import integer_types, string_types, u, b
 from zabby.core.utils import (SIZE_CONVERSION_MODES, validate_mode,
                               convert_size, lines_from_file, lists_from_file,
-                              dict_from_file, to_bytes, sh, tcp_communication)
+                              dict_from_file, to_bytes, sh, tcp_communication,
+                              exception_guard)
 
 
 def test_validate_mode_raises_exception_if_mode_is_not_available():
@@ -217,3 +218,38 @@ class TestTcpCommunication():
         tcp_communication(PORT, requests=[REQUEST])
         calls = [call.sendall(REQUEST), call.recv(ANY), call.close()]
         assert_equal(calls, self.conn.method_calls)
+
+
+class TestExceptionGuard():
+    def test_returns_a_wrapper(self):
+        wrapper = exception_guard(lambda: None)
+        assert_is_instance(wrapper, FunctionType)
+
+    def test_calls_function_when_called(self):
+        f = Mock()
+        f.return_value = sentinel
+        assert_equal(sentinel, exception_guard(f)())
+        f.assert_called_once_with()
+
+    def test_returns_sentinel_when_exception_is_raised(self):
+        exception_class = IOError
+
+        def failing():
+            raise exception_class()
+
+        assert_equal(sentinel,
+                     exception_guard(failing, exception_class, sentinel)())
+
+    def test_does_not_catch_wider_exceptions(self):
+        parent_exception = Exception
+        child_exception = IOError
+        assert_true(issubclass(child_exception, parent_exception))
+
+        def failing():
+            raise parent_exception()
+
+        guarded_function = exception_guard(failing, child_exception)
+        assert_raises(parent_exception, guarded_function)
+
+    def test_passes_arguments(self):
+        assert_equal(sentinel, exception_guard(lambda x: x)(sentinel))

@@ -1,5 +1,5 @@
 from types import FunctionType
-from mock import patch, Mock, ANY
+from mock import patch, Mock, ANY, call
 from nose.tools import assert_raises, assert_equal, assert_true, assert_false
 
 from zabby.tests import (assert_is_instance, ensure_removed,
@@ -7,10 +7,10 @@ from zabby.tests import (assert_is_instance, ensure_removed,
                          assert_less_equal, assert_less, assert_in)
 from zabby.core import utils
 from zabby.core.exceptions import WrongArgumentError, OperatingSystemError
-from zabby.core.six import integer_types, string_types
+from zabby.core.six import integer_types, string_types, u, b
 from zabby.core.utils import (SIZE_CONVERSION_MODES, validate_mode,
                               convert_size, lines_from_file, lists_from_file,
-                              dict_from_file, to_bytes, sh)
+                              dict_from_file, to_bytes, sh, tcp_communication)
 
 
 def test_validate_mode_raises_exception_if_mode_is_not_available():
@@ -118,7 +118,6 @@ class TestSh():
         self.process = Mock()
         self.process.communicate.return_value = (STDOUT, '')
 
-
         self.mock_popen = self._patcher_popen.start()
         self.mock_popen.return_value = self.process
 
@@ -183,3 +182,38 @@ class TestSh():
         sh(COMMAND, timeout=10.0, wait_step=wait_step)()
 
         self.mock_time.sleep.assert_called_with(wait_step)
+
+
+PORT = 8080
+REQUEST = b('')
+
+
+class TestTcpCommunication():
+    def setup(self):
+        self._patcher_socket = patch('zabby.core.utils.socket')
+
+        self.conn = Mock()
+        self.mock_socket = self._patcher_socket.start()
+        self.mock_socket.create_connection.return_value = self.conn
+
+    def teardown(self):
+        self._patcher_socket.stop()
+
+    def test_raises_exception_for_non_binary_requests(self):
+        assert_raises(WrongArgumentError, tcp_communication, PORT,
+                      requests=[u('request')])
+
+    def test_does_not_handle_exceptions(self):
+        exception = IOError
+        self.mock_socket.create_connection.side_effect = exception
+        assert_raises(exception, tcp_communication, PORT)
+
+    def test_receives_before_sending_if_so_requested(self):
+        tcp_communication(PORT, receive_first=True)
+        calls = [call.recv(ANY), call.close()]
+        assert_equal(calls, self.conn.method_calls)
+
+    def test_sends_requests_receives_replies(self):
+        tcp_communication(PORT, requests=[REQUEST])
+        calls = [call.sendall(REQUEST), call.recv(ANY), call.close()]
+        assert_equal(calls, self.conn.method_calls)

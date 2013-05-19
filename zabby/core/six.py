@@ -11,6 +11,7 @@ if PY3:
 
     string_types = str,
     integer_types = int,
+    binary_type = bytes,
 else:
     def b(s):
         return s
@@ -20,3 +21,4 @@ else:
 
     string_types = basestring,
     integer_types = (int, long)
+    binary_type = str

@@ -1,10 +1,12 @@
 from __future__ import division
 from itertools import islice
 import time
+import socket
 import logging
 from subprocess import Popen, PIPE
 
 from zabby.core.exceptions import WrongArgumentError, OperatingSystemError
+from zabby.core.six import binary_type
 
 
 def write_to_file(file_path, value):
@@ -128,7 +130,7 @@ AVERAGE_MODE = {
 }
 
 
-def sh(command, timeout=None, wait_step=0.01):
+def sh(command, timeout=1.0, wait_step=0.01):
     """
     Creates and returns a function that when called will run command with shell
     and return it's output.
@@ -182,3 +184,38 @@ def sh(command, timeout=None, wait_step=0.01):
         return out.rstrip()
 
     return call_command
+
+
+def tcp_communication(port, host='localhost', requests=list(),
+                      receive_first=False, timeout=1.0):
+    """
+    Connects to port, optionally sending requests and returns any responses
+
+    :param requests: list of binary objects that will be sent in order
+        it is expected that there will be a response for every request
+    :param receive_first: if true will try to receive data before sending any
+        requests
+
+    :raises: IOError, no exception handling is done in this function, most
+        exceptions will be socket exceptions
+    """
+    if any([not isinstance(request, binary_type) for request in requests]):
+        raise WrongArgumentError("Every request should be in binary. "
+                                 "Requests: '{0}'".format(requests))
+
+    conn = None
+    responses = list()
+    try:
+        conn = socket.create_connection((host, port), timeout=timeout)
+        if receive_first:
+            responses.append(conn.recv(4096))
+
+        for request in requests:
+            conn.sendall(request)
+            responses.append(conn.recv(4096))
+
+    finally:
+        if conn is not None:
+            conn.close()
+
+    return responses

@@ -44,8 +44,9 @@ def get_data_source():
     return __DATA_SOURCE__
 
 
-class AgentServer(socketserver.TCPServer):
+class AgentServer(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
+    daemon_threads = True
 
 
 class AgentRequestHandler(socketserver.BaseRequestHandler):

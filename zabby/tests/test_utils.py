@@ -1,6 +1,6 @@
 from types import FunctionType
 from mock import patch, Mock, ANY
-from nose.tools import assert_raises, assert_equal, assert_true
+from nose.tools import assert_raises, assert_equal, assert_true, assert_false
 
 from zabby.tests import (assert_is_instance, ensure_removed,
                          ensure_contains_only_formatted_lines,
@@ -113,16 +113,21 @@ ARGUMENT = 'argument'
 
 class TestSh():
     def setup(self):
-        self._patcher = patch('zabby.core.utils.Popen')
+        self._patcher_popen = patch('zabby.core.utils.Popen')
 
         self.process = Mock()
         self.process.communicate.return_value = (STDOUT, '')
 
-        self.mock_popen = self._patcher.start()
+
+        self.mock_popen = self._patcher_popen.start()
         self.mock_popen.return_value = self.process
 
+        self._patcher_time = patch('zabby.core.utils.time')
+        self.mock_time = self._patcher_time.start()
+
     def teardown(self):
-        self._patcher.stop()
+        self._patcher_popen.stop()
+        self._patcher_time.stop()
 
     def test_returns_a_function(self):
         f = sh(COMMAND)
@@ -159,3 +164,22 @@ class TestSh():
     def test_calling_command_that_accepts_arguments_without_them(self):
         f = sh(COMMAND_WITH_ARGUMENTS)
         assert_raises(WrongArgumentError, f)
+
+    def test_calling_command_without_timeout_does_not_poll(self):
+        sh(COMMAND, timeout=None)()
+
+        assert_false(self.process.poll.called)
+
+    def test_raises_exception_if_poll_never_succeed(self):
+        self.process.poll.return_value = None
+
+        command = sh(COMMAND, timeout=10.0)
+        assert_raises(OperatingSystemError, command)
+
+    def test_does_not_raise_exception_if_poll_eventually_succeed(self):
+        self.process.poll.side_effect = [None, 0]
+
+        wait_step = 0.1
+        sh(COMMAND, timeout=10.0, wait_step=wait_step)()
+
+        self.mock_time.sleep.assert_called_with(wait_step)

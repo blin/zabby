@@ -1,5 +1,6 @@
 from __future__ import division
 from itertools import islice
+import time
 import logging
 from subprocess import Popen, PIPE
 
@@ -127,7 +128,7 @@ AVERAGE_MODE = {
 }
 
 
-def sh(command):
+def sh(command, timeout=None, wait_step=0.01):
     """
     Creates and returns a function that when called will run command with shell
     and return it's output.
@@ -139,8 +140,13 @@ def sh(command):
 
     Everything written to stderr by command will be logged
 
+    :param timeout: if command does not terminate in it will be killed and
+        OperatingSystemError will be raised
+    :param wait_step: poll interval for process running command
+
     :raises: WrongArgumentError if command contains replacement fields and
         resulting function is called without arguments
+    :raises: OperatingSystemError if command does not terminate until timeout
     """
 
     def call_command(*args):
@@ -150,8 +156,22 @@ def sh(command):
             raise WrongArgumentError(
                 "'{0}' not enough arguments. Called with {1}".format(command,
                                                                      args))
-        (out, err) = Popen(formatted_command, stdout=PIPE, stderr=PIPE,
-                           shell=True, universal_newlines=True).communicate()
+        process = Popen(formatted_command, stdout=PIPE, stderr=PIPE, shell=True,
+                        universal_newlines=True)
+
+        if timeout:
+            wait_time_remaining = timeout
+            while process.poll() is None and wait_time_remaining > 0:
+                time.sleep(wait_step)
+                wait_time_remaining -= wait_step
+
+            if wait_time_remaining <= 0:
+                process.kill()
+                raise OperatingSystemError(
+                    "{0} have not completed in {1} seconds".format(
+                        formatted_command, timeout))
+
+        (out, err) = process.communicate()
 
         if err != '':
             log = logging.getLogger('sh')

@@ -33,4 +33,6 @@ items = {
     'system.swap.out': system.swap.out_of_memory,
 
     'kernel.maxproc': kernel.maxproc,
+
+    'vfs.file.md5sum': vfs.file.md5sum,
 }

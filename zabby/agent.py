@@ -86,9 +86,10 @@ class ZBXDProtocol():
             )[0]
             key = client.recv(expected_length)
         else:
-            raise Exception(
-                "Expected to receive {0}, received {1}".format(self.HEADER,
-                                                               received))
+            if '\n' in received:
+                key = received
+            else:
+                key = received + client.recv(self.MAX_KEY_LENGTH)
         return key.decode('utf-8')
 
     def send_value(self, client, value):

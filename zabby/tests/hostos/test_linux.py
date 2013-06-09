@@ -54,6 +54,18 @@ class TestLinux():
         for key, value in interface_info._asdict().items():
             assert_is_instance(value, integer_types)
 
+    NET_INFO_JOINED_NAME = [
+        "Inter-|   Receive                                                |  Transmit",
+        " face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed",
+        "    lo:9091406708 32855976    0    0    0     0          0         0 9091406708 32855976    0    0    0     0       0          0",
+    ]
+
+    @patch('zabby.hostos.linux.lines_from_file')
+    def test_net_interface_infos_works_with_joined_names(self, mock_lines):
+        mock_lines.return_value = self.NET_INFO_JOINED_NAME
+
+        assert_in(PRESENT_INTERFACE, self.linux.net_interface_names())
+
     def test_process_infos_returns_iterable_of_ProcessInfo(self):
         process_infos = list(self.linux.process_infos())
 

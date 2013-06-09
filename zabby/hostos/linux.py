@@ -122,18 +122,20 @@ class Linux(HostOS):
         return interface_infos[net_interface_name]
 
     def _net_interface_infos(self):
-        lists = lists_from_file("/proc/net/dev")
-        interface_infos = lists[2:]
+        lines = lines_from_file("/proc/net/dev")
+        interface_info_lines = lines[2:]
 
         interface_stats = dict()
-        for interface_info in interface_infos:
-            interface_name = interface_info[0].rstrip(':')
-            incoming = [int(value) for value in interface_info[1:5]]
-            outgoing = [int(value) for value in interface_info[9:13]]
-            collisions = [int(interface_info[15])]
+        for interface_info_line in interface_info_lines:
+            interface_name, interface_info = interface_info_line.split(':')
+            interface_name = interface_name.strip()
+            interface_info = interface_info.split()
+
+            incoming = [int(value) for value in interface_info[0:4]]
+            outgoing = [int(value) for value in interface_info[8:12]]
+            collisions = [int(interface_info[14])]
             interface_stats[interface_name] = NetworkInterfaceInfo(
                 *(incoming + outgoing + collisions))
-
         return interface_stats
 
     def process_infos(self):

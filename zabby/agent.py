@@ -1,5 +1,6 @@
 import struct
 import logging
+import sys
 from zabby.core.exceptions import WrongArgumentError
 
 try:
@@ -47,6 +48,11 @@ def get_data_source():
 class AgentServer(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     daemon_threads = True
+
+    def handle_error(self, request, client_address):
+        _, value, _ = sys.exc_info()
+        exception_message = str(value)
+        LOG.warn(exception_message)
 
 
 class AgentRequestHandler(socketserver.BaseRequestHandler):
@@ -125,6 +131,8 @@ class DataSource:
         is passed to it returns ZBX_NOTSUPPORTED
         """
         key, arguments = self.key_parser.parse(raw_key)
+        LOG.debug("Received request for '{0}' with arguments {1}".format(
+            key, arguments))
 
         value = self.DEFAULT_VALUE
         try:
@@ -143,6 +151,7 @@ class DataSource:
                     key=key, arguments=arguments))
             LOG.error("Unexpected exception occurred: {0}".format(e))
 
+        LOG.debug("Responding with {0}".format(value))
         return value
 
 

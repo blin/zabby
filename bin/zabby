@@ -4,6 +4,7 @@ import signal
 import logging
 
 from zabby import __version__
+from zabby.core.exceptions import ConfigurationError
 from zabby.hostos import detect_host_os
 from zabby.agent import (DataSource, KeyParser, AgentRequestHandler,
                          set_data_source, set_protocol, ZBXDProtocol,
@@ -42,7 +43,10 @@ def shutdown_handler(signal, frame):
 
 def reload_handler(signal, frame):
     LOG.info('Got SIGHUP, reloading config')
-    config_manager.update_config()
+    try:
+        config_manager.update_config()
+    except ConfigurationError:
+        LOG.warn('Exception occurred while reloading configuration')
 
 
 signal.signal(signal.SIGINT, shutdown_handler)

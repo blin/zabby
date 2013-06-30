@@ -19,6 +19,9 @@ class ConfigManager:
     def update_config(self):
         """
         Reloads configuration from config_path binding
+
+        :raises: ConfigurationError if configuration files are not valid python
+        modules or if required module attributes are of wrong type
         """
         try:
             self._config = self._config_loader.load(self._config_path)
@@ -26,8 +29,11 @@ class ConfigManager:
                                       disable_existing_loggers=False)
             self._set_listen_address()
             self._load_items()
-        except (AttributeError, IOError, SyntaxError) as e:
-            raise ConfigurationError(e)
+        except ConfigurationError as e:
+            raise e
+        except Exception as e:
+            LOG.exception(e)
+            raise ConfigurationError()
 
     def _set_listen_address(self):
         self._check_type(self._config.listen_host, string_types)
@@ -58,7 +64,8 @@ class ModuleLoader():
         Returns module contained in module_path
 
         :raises: IOError if unable to access module_path
-        :raises: SyntaxError if module is not a valid python source
+        :raises: SyntaxError, NameError, TypeError, ValueError
+            if module contains invalid python code
         """
         try:
             return imp.load_source(module_path, module_path)

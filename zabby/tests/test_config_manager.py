@@ -106,9 +106,21 @@ class TestModuleLoader():
     def test_load_nonexistent_path(self):
         assert_raises(IOError, self.module_loader.load, CONFIG_PATH)
 
-    def test_load_module_with_errors(self):
+    def test_load_module_with_syntax_errors(self):
         write_to_file(CONFIG_PATH, 'a b c')
         assert_raises(SyntaxError, self.module_loader.load, CONFIG_PATH)
+
+    def test_load_module_with_name_errors(self):
+        write_to_file(CONFIG_PATH, 'a')
+        assert_raises(NameError, self.module_loader.load, CONFIG_PATH)
+
+    def test_load_module_with_type_errors(self):
+        write_to_file(CONFIG_PATH, 'a = 1; a()')
+        assert_raises(TypeError, self.module_loader.load, CONFIG_PATH)
+
+    def test_load_module_with_value_errors(self):
+        write_to_file(CONFIG_PATH, 'a,b = [1, 2, 3]')
+        assert_raises(ValueError, self.module_loader.load, CONFIG_PATH)
 
     def test_load_working_module(self):
         write_to_file(CONFIG_PATH, 'a = 1')

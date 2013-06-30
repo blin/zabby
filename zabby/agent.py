@@ -134,12 +134,16 @@ class DataSource:
         LOG.debug("Received request for '{0}' with arguments {1}".format(
             key, arguments))
 
-        value = self.DEFAULT_VALUE
+        function = None
         try:
             function = self.config.items[key]
-            value = function(*arguments)
         except KeyError:
             LOG.warning("Unknown key: {key}".format(key=key))
+
+        value = self.DEFAULT_VALUE
+        try:
+            if function:
+                value = function(*arguments)
         except (TypeError, WrongArgumentError) as e:
             LOG.warning(
                 "Wrong arguments for key '{key}': {arguments}".format(

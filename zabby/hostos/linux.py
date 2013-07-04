@@ -191,7 +191,14 @@ class Linux(HostOS):
         process_status['State'] = PROCESS_STATE_MAP.get(
             process_status['State'], 'sleep'
         )
-        process_status['VmSize'] = to_bytes(*process_status['VmSize'].split())
+
+        # VmSize field can be missing
+        # See ${linux}/fs/proc/array.c:proc_pid_status for more information
+        if 'VmSize' in process_status:
+            process_status['VmSize'] = to_bytes(
+                *process_status['VmSize'].split())
+        else:
+            process_status['VmSize'] = 0
 
         return process_status
 

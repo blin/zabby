@@ -106,14 +106,22 @@ class ZBXDProtocol():
         client.sendall(message)
 
     def _calculate_message(self, value):
-        data_length = len(str(value))
+        formatted_value = self._format(value)
+        data_length = len(formatted_value)
         response = struct.pack(
             self.RESPONSE_FORMAT.format(data_length=data_length),
             self.HEADER,
             data_length,
-            b(str(value))
+            b(formatted_value)
         )
         return response
+
+    def _format(self, value):
+        if isinstance(value, float):
+            formatted_value = '{0:.4f}'.format(value)
+        else:
+            formatted_value = str(value)
+        return formatted_value
 
 
 class DataSource:

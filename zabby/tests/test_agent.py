@@ -4,7 +4,7 @@ from mock import Mock, ANY
 from nose.tools import assert_equal
 from zabby.core.exceptions import WrongArgumentError
 
-from zabby.tests import assert_is_instance
+from zabby.tests import assert_is_instance, assert_not_in
 from zabby.core.six import b, u, string_types
 from zabby.agent import (AgentRequestHandler, set_protocol, set_data_source,
                          ZBXDProtocol, DataSource, KeyParser)
@@ -67,6 +67,13 @@ class TestProtocol():
         self.protocol.send_value(self.client, "1")
         self.client.sendall.assert_called_with(ANY)
         assert_is_instance(self.client.sendall.call_args[0][0], bytes)
+
+    def test_floats_are_not_sent_in_scientific_notation(self):
+        self.protocol.send_value(self.client, 1.06828003857e+12)
+        sent_message = self.client.sendall.call_args[0][0]
+        decoded_message = sent_message.decode('utf-8')
+        assert_not_in('e+', decoded_message)
+        assert_not_in('E+', decoded_message)
 
 
 class TestDataSource():

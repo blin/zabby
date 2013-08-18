@@ -1,5 +1,6 @@
 import logging
 import re
+from zabby.core.exceptions import WrongArgumentError
 
 from zabby.core.utils import validate_mode, tcp_communication
 
@@ -20,10 +21,29 @@ def service(service_name, ip='127.0.0.1', port=None, timeout=1.0):
             port: 22
     :param port: overrides port specified by service_name
 
-    :raises: WrongArgument if unsupported service_name is supplied
+    :raises: WrongArgumentError if unsupported service_name is supplied,
+        port is not an integer in range [0,65535] or
+        timeout is not a positive float
     """
     validate_mode(service_name, SERVICES.keys())
-    port = int(port) if port else SERVICES[service_name]
+    if port:
+        try:
+            port = int(port)
+            if port < 0 or 65535 < port:
+                raise ValueError()
+        except ValueError:
+            raise WrongArgumentError(
+                "Port must be an integer in range [0,65535], got '{0}'".format(
+                    port))
+    else:
+        port = SERVICES[service_name]
+    try:
+        timeout = float(timeout)
+        if timeout < 0.0:
+            raise ValueError()
+    except:
+        raise WrongArgumentError(
+            "Timeout must be float greater than 0, got '{0}'".format(timeout))
 
     if service_name == 'ssh':
         running = _check_ssh(ip, port, timeout)

@@ -1,3 +1,4 @@
+import string
 import struct
 import logging
 import sys
@@ -167,7 +168,73 @@ class DataSource:
         return value
 
 
+class ArgumentParser():
+    def __init__(self, quote='"', separator=','):
+        self.quote = quote
+        self.separator = separator
+        self.to_strip = self.quote + string.whitespace
+
+    def parse(self, unparsed_arguments):
+        """
+        Separates arguments based on separator and strips them of quotes and
+        whitespace
+        """
+        raise NotImplementedError()
+
+
+class ArgumentParserWithQuoting(ArgumentParser):
+    """
+    This argument parser allows for separator inside quoted arguments
+    To use quote inside argument you should escape it with backslash character
+
+    "ar\",g0","ar\",g1" will be parsed as ['ar",g0', 'ar",g1']
+    """
+    def parse(self, unparsed_arguments):
+        arguments = list()
+
+        while len(unparsed_arguments) != 0:
+            argument_end = self._find_argument_end(unparsed_arguments)
+
+            argument = unparsed_arguments[:argument_end]
+            argument = argument.strip(self.to_strip)
+            argument = argument.replace('\\' + self.quote, self.quote)
+            arguments.append(argument)
+            unparsed_arguments = unparsed_arguments[argument_end + 1:]
+
+        return arguments
+
+    def _find_first_comma(self, unparsed_arguments, start):
+        first_comma_position = unparsed_arguments.find(self.separator, start)
+        return (first_comma_position
+                if first_comma_position > 0
+                else len(unparsed_arguments))
+
+    def _find_quoted_argument_end(self, unparsed_arguments):
+        argument_end_found = False
+        start = 1
+        while not argument_end_found:
+            quote_position = unparsed_arguments.find(self.quote, start)
+            if quote_position == -1:
+                raise WrongArgumentError('Missing terminating quote')
+            start = quote_position + 1
+
+            quote_escaped = unparsed_arguments[quote_position - 1] == '\\'
+            if not quote_escaped:
+                argument_end_found = True
+        return self._find_first_comma(unparsed_arguments, start)
+
+    def _find_argument_end(self, unparsed_arguments):
+        quoted = unparsed_arguments[0] == self.quote
+        if quoted:
+            return self._find_quoted_argument_end(unparsed_arguments)
+        else:
+            return self._find_first_comma(unparsed_arguments, 0)
+
+
 class KeyParser():
+    def __init__(self, argument_parser=ArgumentParserWithQuoting()):
+        self.argument_parser = argument_parser
+
     def parse(self, raw_key):
         """
         Separates key from arguments
@@ -187,7 +254,7 @@ class KeyParser():
         if opening_bracket_index != -1:
             key = raw_key[:opening_bracket_index]
             unparsed_arguments = raw_key[opening_bracket_index + 1:-1]
-            arguments = unparsed_arguments.split(",")
+            arguments = self.argument_parser.parse(unparsed_arguments)
         else:
             key = raw_key
             arguments = []

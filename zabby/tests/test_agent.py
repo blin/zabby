@@ -1,13 +1,14 @@
 # coding=utf-8
 import struct
 from mock import Mock, ANY
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_raises
 from zabby.core.exceptions import WrongArgumentError
 
 from zabby.tests import assert_is_instance, assert_not_in
 from zabby.core.six import b, u, string_types
 from zabby.agent import (AgentRequestHandler, set_protocol, set_data_source,
-                         ZBXDProtocol, DataSource, KeyParser)
+                         ZBXDProtocol, DataSource, KeyParser,
+                         ArgumentParserWithQuoting)
 
 KEY = 'unicode/юникод'
 KEY_PROCESS_RESULT = 'result/результат'
@@ -142,3 +143,47 @@ class TestKeyParser():
     def test_key_with_newline(self):
         key, arguments = self.parser.parse(KEY + '\n')
         assert_equal(KEY, key)
+
+
+class TestArgumentParserWithQuoting():
+    def setUp(self):
+        self.separator = ','
+        self.quote = '"'
+        self.argument_parser = ArgumentParserWithQuoting(self.quote,
+                                                         self.separator)
+        self.safe_arguments = list()
+        self.unsafe_arguments = list()
+        for i in range(5):
+            self.safe_arguments.append("arg{0}".format(i))
+            self.unsafe_arguments.append('ar,\\"g{0}'.format(i))
+
+    def test_single_unquoted_argument(self):
+        arguments = self.argument_parser.parse(self.safe_arguments[0])
+        assert_equal([self.safe_arguments[0]], arguments)
+
+    def test_unquoted_arguments(self):
+        arguments = self.argument_parser.parse(self.separator.join(
+            self.safe_arguments))
+        assert_equal(self.safe_arguments, arguments)
+
+    def test_single_quoted_argument(self):
+        arguments = self.argument_parser.parse(self._quote(
+            self.safe_arguments[0]))
+        assert_equal([self.safe_arguments[0]], arguments)
+
+    def test_quoted_arguments(self):
+        arguments = self.argument_parser.parse(self.separator.join(
+            [self._quote(a) for a in self.safe_arguments]))
+        assert_equal(self.safe_arguments, arguments)
+
+    def test_unsafe_quoted_arguments(self):
+        arguments = self.argument_parser.parse(self.separator.join(
+            [self._quote(a) for a in self.unsafe_arguments]))
+        assert_equal([a.replace('\\' + self.quote, self.quote)
+                      for a in self.unsafe_arguments], arguments)
+
+    def test_raises_exception_if_quoted_argument_is_not_terminated(self):
+        assert_raises(WrongArgumentError, self.argument_parser.parse, '"arg')
+
+    def _quote(self, s):
+        return '{quote}{s}{quote}"'.format(s=s, quote=self.quote)

@@ -144,6 +144,9 @@ class TestKeyParser():
         key, arguments = self.parser.parse(KEY + '\n')
         assert_equal(KEY, key)
 
+    def test_raises_exception_if_missing_closing_bracket(self):
+        assert_raises(WrongArgumentError, self.parser.parse, KEY + '[1')
+
 
 class TestArgumentParserWithQuoting():
     def setUp(self):

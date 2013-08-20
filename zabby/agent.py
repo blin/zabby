@@ -189,6 +189,7 @@ class ArgumentParserWithQuoting(ArgumentParser):
 
     "ar\",g0","ar\",g1" will be parsed as ['ar",g0', 'ar",g1']
     """
+
     def parse(self, unparsed_arguments):
         arguments = list()
 
@@ -251,9 +252,15 @@ class KeyParser():
         raw_key = raw_key.rstrip()
 
         opening_bracket_index = raw_key.find("[")
-        if opening_bracket_index != -1:
+        has_arguments = opening_bracket_index != -1
+        if has_arguments:
             key = raw_key[:opening_bracket_index]
-            unparsed_arguments = raw_key[opening_bracket_index + 1:-1]
+            closing_bracket_index = raw_key.rfind("]")
+            if closing_bracket_index == -1:
+                raise WrongArgumentError('Missing terminating bracket')
+            unparsed_arguments = (raw_key[
+                                  opening_bracket_index + 1:
+                                  closing_bracket_index])
             arguments = self.argument_parser.parse(unparsed_arguments)
         else:
             key = raw_key

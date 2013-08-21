@@ -73,7 +73,7 @@ class AgentRequestHandler(socketserver.BaseRequestHandler):
 
 
 class ZBXDProtocol():
-    MAX_KEY_LENGTH = 1024
+    MAX_KEY_LENGTH = 65536
     HEADER = b'ZBXD\1'
     HEADER_LENGTH = 5
     EXPECTED_LENGTH_SIZE = 8

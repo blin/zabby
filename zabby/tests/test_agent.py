@@ -160,6 +160,9 @@ class TestArgumentParserWithQuoting():
             self.safe_arguments.append("arg{0}".format(i))
             self.unsafe_arguments.append('ar,\\"g{0}'.format(i))
 
+    def _quote(self, s):
+        return '{quote}{s}{quote}"'.format(s=s, quote=self.quote)
+
     def test_single_unquoted_argument(self):
         arguments = self.argument_parser.parse(self.safe_arguments[0])
         assert_equal([self.safe_arguments[0]], arguments)
@@ -188,5 +191,11 @@ class TestArgumentParserWithQuoting():
     def test_raises_exception_if_quoted_argument_is_not_terminated(self):
         assert_raises(WrongArgumentError, self.argument_parser.parse, '"arg')
 
-    def _quote(self, s):
-        return '{quote}{s}{quote}"'.format(s=s, quote=self.quote)
+    def test_skipped_unquoted_arguments_are_parsed_as_empty_strings(self):
+        assert_equal(['', self.safe_arguments[0]], self.argument_parser.parse(
+            self.separator + self.safe_arguments[0]))
+
+    def test_skipped_quoted_arguments_are_parsed_as_empty_strings(self):
+        assert_equal(['', self.safe_arguments[0]], self.argument_parser.parse(
+            self.quote + self.quote + self.separator +
+            self._quote(self.safe_arguments[0])))

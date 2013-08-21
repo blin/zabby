@@ -188,6 +188,10 @@ class ArgumentParserWithQuoting(ArgumentParser):
     To use quote inside argument you should escape it with backslash character
 
     "ar\",g0","ar\",g1" will be parsed as ['ar",g0', 'ar",g1']
+
+    Empty arguments are(grudgingly) supported
+    ,arg0 and "","arg0" will be parsed as ['','arg0']
+    , will be parsed as ['']
     """
 
     def parse(self, unparsed_arguments):
@@ -207,7 +211,7 @@ class ArgumentParserWithQuoting(ArgumentParser):
     def _find_first_comma(self, unparsed_arguments, start):
         first_comma_position = unparsed_arguments.find(self.separator, start)
         return (first_comma_position
-                if first_comma_position > 0
+                if first_comma_position >= 0
                 else len(unparsed_arguments))
 
     def _find_quoted_argument_end(self, unparsed_arguments):

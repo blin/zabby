@@ -10,7 +10,7 @@ from zabby.core.six import integer_types, string_types
 from zabby.hostos import (detect_host_os, NetworkInterfaceInfo, ProcessInfo,
                           DiskDeviceStats, CpuTimes, SystemLoad, SwapInfo)
 from zabby.tests import (assert_is_instance, assert_less, assert_in,
-                         assert_less_equal)
+                         assert_less_equal, assert_not_in)
 
 
 PRESENT_FILESYSTEM = '/'
@@ -170,6 +170,16 @@ class TestLinux():
         for swap_device in swap_devices:
             assert_in(swap_device, disk_devices)
 
+    @patch('zabby.hostos.linux.lines_from_file')
+    def test_swap_device_names_skips_files(self, mock_lists):
+        swap_file_path = '/mnt/swap_file'
+        mock_lists.return_value = [
+            ['Filename', 'Type', 'Size', 'Used', 'Priority'],
+            ['/dev/dm-0', 'partition', '10485756', '311756', '-1'],
+            [swap_file_path, 'file', '524284', '0', '-2']]
+
+        swap_devices = self.linux.swap_device_names()
+        assert_not_in(swap_file_path.split('/')[-1], swap_devices)
 
 @attr(os='linux')
 class TestLinuxCollectors():

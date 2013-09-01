@@ -388,6 +388,10 @@ class Linux(HostOS):
 
         devices = set()
         for swap in swaps[1:]:  # skip header
+            swap_type = swap[1]
+            if swap_type != 'partition':
+                continue
+
             device_path = swap[0]
             device = device_path.split('/')[-1]
             devices.add(device)

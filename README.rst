@@ -53,6 +53,8 @@ system.cpu.util[,idle] will be treated as system.cpu.util(cpu='', state='idle', 
 
 You should pass 'all processes' and 'all users' to proc.num explicitly, proc[,root] should be proc[all processes,root]
 
+Oldest supported linux kernel version is 2.6.26
+
 Testing
 -------
 All tests are done using nose_ . Tests are currently separated as os dependent and os independent. 

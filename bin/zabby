@@ -22,39 +22,42 @@ config_manager.update_config()
 if options.daemonize:
     daemonize(options.pid_file)
 
-set_data_source(DataSource(KeyParser(), config_manager))
-set_protocol(ZBXDProtocol())
+# at this point stdout and stderr are written to nowhere
+# every exception should be logged
+try:
+    set_data_source(DataSource(KeyParser(), config_manager))
+    set_protocol(ZBXDProtocol())
 
-server = AgentServer(config_manager.listen_address, AgentRequestHandler)
+    server = AgentServer(config_manager.listen_address, AgentRequestHandler)
 
-host_os = detect_host_os()
-host_os.start_collectors()
+    host_os = detect_host_os()
+    host_os.start_collectors()
 
-threading.Thread(target=server.serve_forever).start()
+    threading.Thread(target=server.serve_forever).start()
 
-shutdown = threading.Event()
+    shutdown = threading.Event()
 
+    def shutdown_handler(signal, frame):
+        server.shutdown()
+        host_os.stop_collectors()
+        shutdown.set()
 
-def shutdown_handler(signal, frame):
-    server.shutdown()
-    host_os.stop_collectors()
-    shutdown.set()
-
-
-def reload_handler(signal, frame):
-    LOG.info('Got SIGHUP, reloading config')
-    try:
-        config_manager.update_config()
-    except ConfigurationError:
-        LOG.warn('Exception occurred while reloading configuration')
+    def reload_handler(signal, frame):
+        LOG.info('Got SIGHUP, reloading config')
+        try:
+            config_manager.update_config()
+        except ConfigurationError:
+            LOG.warn('Exception occurred while reloading configuration')
 
 
-signal.signal(signal.SIGINT, shutdown_handler)
-signal.signal(signal.SIGTERM, shutdown_handler)
+    signal.signal(signal.SIGINT, shutdown_handler)
+    signal.signal(signal.SIGTERM, shutdown_handler)
 
-signal.signal(signal.SIGHUP, reload_handler)
+    signal.signal(signal.SIGHUP, reload_handler)
 
-LOG.info("Started zabby {0}".format(__version__))
-while not shutdown.is_set():
-    signal.pause()
-LOG.info('Stopped')
+    LOG.info("Started zabby {0}".format(__version__))
+    while not shutdown.is_set():
+        signal.pause()
+    LOG.info('Stopped')
+except:
+    LOG.exception('Exception occurred')

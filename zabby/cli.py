@@ -28,6 +28,9 @@ def daemonize(pid_file):
         if pid > 0:
             os._exit(0)
 
+    if os.path.exists(pid_file):
+        raise RuntimeError("Pid file {0} already exists".format(pid_file))
+
     fork_exit_parent()
     os.setsid()
     fork_exit_parent()

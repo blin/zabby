@@ -1,0 +1,31 @@
+#!/bin/sh -e
+
+if ! getent group zabby > /dev/null 2>&1 ; then
+addgroup --system --quiet zabby
+fi
+
+if ! getent passwd zabby > /dev/null 2>&1 ; then
+adduser --quiet \
+--system --disabled-login --ingroup zabby \
+--home /var/run/zabby/ --no-create-home \
+zabby
+fi
+
+chown zabby:zabby /var/log/zabby -R
+chown zabby:zabby /var/run/zabby -R
+
+# Automatically added by dh_python2:
+if which pycompile >/dev/null 2>&1; then
+	pycompile -p zabby 
+fi
+
+# End automatically added section
+# Automatically added by dh_installinit
+if [ -x "/etc/init.d/zabby" ]; then
+	update-rc.d zabby defaults >/dev/null
+	invoke-rc.d zabby start || exit $?
+fi
+# End automatically added section
+
+
+exit 0

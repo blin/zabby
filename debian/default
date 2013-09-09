@@ -1,0 +1,4 @@
+PID_DIR="/var/run/zabby"
+PID_FILE="${PID_DIR}/zabby.pid"
+
+DAEMON_OPTIONS="--daemonize --pid-file=$PID_FILE"

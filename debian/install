@@ -1,0 +1,3 @@
+zabby/examples/items etc/zabby
+debian/config/config.py etc/zabby
+debian/config/logging.conf etc/zabby

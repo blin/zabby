@@ -1,0 +1,20 @@
+Source: zabby
+Maintainer: Evgeniy Petrov <blin@f4oe.org>
+Section: python
+Priority: optional
+X-Python-Version: >= 2.6
+Build-Depends: python (>= 2.6.6-3), debhelper (>= 7.4.3)
+Standards-Version: 3.9.1
+Homepage: https://github.com/blin/zabby
+Vcs-Git: https://github.com/blin/zabby.git
+Vcs-Browser: https://github.com/blin/zabby
+
+Package: zabby
+Architecture: all
+Depends: adduser, ${misc:Depends}, ${python:Depends}
+Description: This is a fork of zabbix agent to python.
+ Main goal of porting to python is to provide administrators with an
+ easy way to understand how items work.
+ Instead of digging through C source code (that you have to download first)
+ you can read well
+ documented(and tested!) python code on your machine and execute it.

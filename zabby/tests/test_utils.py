@@ -148,7 +148,7 @@ class TestSh():
     def test_command_errors_are_logged(self, mock_logging):
         mock_logger = Mock()
         mock_logging.getLogger.return_value = mock_logger
-        self.process.communicate.return_value = ('', STDERR)
+        self.process.communicate.return_value = (STDOUT, STDERR)
 
         sh(COMMAND)()
         mock_logger.warn.assert_called_once_with(ANY)
@@ -183,6 +183,12 @@ class TestSh():
         sh(COMMAND, timeout=10.0, wait_step=wait_step)()
 
         self.mock_time.sleep.assert_called_with(wait_step)
+
+    def test_raises_exception_if_command_does_not_produce_output(self):
+        self.process.communicate.return_value = ('', '')
+
+        f = sh(COMMAND)
+        assert_raises(OperatingSystemError, f)
 
 
 PORT = 8080

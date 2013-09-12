@@ -130,7 +130,7 @@ AVERAGE_MODE = {
 }
 
 
-def sh(command, timeout=1.0, wait_step=0.01):
+def sh(command, timeout=1.0, wait_step=0.01, raise_on_empty_out=True):
     """
     Creates and returns a function that when called will run command with shell
     and return it's output.
@@ -145,6 +145,8 @@ def sh(command, timeout=1.0, wait_step=0.01):
     :param timeout: if command does not terminate in it will be killed and
         OperatingSystemError will be raised
     :param wait_step: poll interval for process running command
+    :param raise_on_empty_out: whether exception should be raised if command
+        does not write anything to stdout
 
     :raises: WrongArgumentError if command contains replacement fields and
         resulting function is called without arguments
@@ -174,6 +176,11 @@ def sh(command, timeout=1.0, wait_step=0.01):
                         formatted_command, timeout))
 
         (out, err) = process.communicate()
+        (out, err) = (out.rstrip(), err.rstrip())
+
+        if out == '' and raise_on_empty_out:
+            raise OperatingSystemError(
+                "'{0}' has not written to stdout".format(formatted_command))
 
         if err != '':
             log = logging.getLogger('sh')
@@ -181,7 +188,7 @@ def sh(command, timeout=1.0, wait_step=0.01):
                 "'{0}' has written to stderr: {1}".format(formatted_command,
                                                           err))
 
-        return out.rstrip()
+        return out
 
     return call_command
 

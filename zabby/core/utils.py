@@ -130,7 +130,8 @@ AVERAGE_MODE = {
 }
 
 
-def sh(command, timeout=1.0, wait_step=0.01, raise_on_empty_out=True):
+def sh(command, timeout=1.0, wait_step=0.01, raise_on_empty_out=True,
+       raise_on_nonempty_err=False):
     """
     Creates and returns a function that when called will run command with shell
     and return it's output.
@@ -140,13 +141,13 @@ def sh(command, timeout=1.0, wait_step=0.01, raise_on_empty_out=True):
 
     sh('command {0}')('argument') will call 'command argument'
 
-    Everything written to stderr by command will be logged
-
     :param timeout: if command does not terminate in it will be killed and
         OperatingSystemError will be raised
     :param wait_step: poll interval for process running command
     :param raise_on_empty_out: whether exception should be raised if command
         does not write anything to stdout
+    :param raise_on_nonempty_err: whether exception should be raised if command
+        writes to stderr
 
     :raises: WrongArgumentError if command contains replacement fields and
         resulting function is called without arguments
@@ -183,10 +184,14 @@ def sh(command, timeout=1.0, wait_step=0.01, raise_on_empty_out=True):
                 "'{0}' has not written to stdout".format(formatted_command))
 
         if err != '':
-            log = logging.getLogger('sh')
-            log.warn(
-                "'{0}' has written to stderr: {1}".format(formatted_command,
-                                                          err))
+            message = "'{0}' has written to stderr: {1}".format(
+                formatted_command, err)
+
+            if raise_on_nonempty_err:
+                raise OperatingSystemError(message)
+            else:
+                log = logging.getLogger('sh')
+                log.warn(message)
 
         return out
 

@@ -190,6 +190,12 @@ class TestSh():
         f = sh(COMMAND)
         assert_raises(OperatingSystemError, f)
 
+    def test_raises_exception_if_command_produces_errors(self):
+        self.process.communicate.return_value = (STDOUT, STDERR)
+
+        f = sh(COMMAND, raise_on_nonempty_err=True)
+        assert_raises(OperatingSystemError, f)
+
 
 PORT = 8080
 REQUEST = b('')

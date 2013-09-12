@@ -1,3 +1,9 @@
+zabby (0.1.4) unstable; urgency=low
+
+  * Version bump
+
+ -- Evgeniy Petrov <blin@i-free.com>  Thu, 12 Sep 2013 21:42:26 +0400
+
 zabby (0.1.2-2) stable; urgency=low
 
   * Lintian returns
@@ -20,4 +26,4 @@ zabby (0.1.0) unstable; urgency=low
 
   * source package automatically created by stdeb 0.6.0+git
 
- -- blin <blin@f4oe.org>  Mon, 29 Apr 2013 08:53:52 +0400
+ -- Evgeniy Petrov <blin@i-free.com>  Mon, 29 Apr 2013 08:53:52 +0400

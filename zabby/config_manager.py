@@ -1,4 +1,5 @@
 import imp
+import os.path
 import logging
 import logging.config
 from zabby.core.exceptions import ConfigurationError
@@ -68,7 +69,8 @@ class ModuleLoader():
             if module contains invalid python code
         """
         try:
-            return imp.load_source(module_path, module_path)
+            module_name = os.path.split(module_path)[-1].split('.')[0]
+            return imp.load_source(module_name, module_path)
         except (IOError, SyntaxError) as e:
             LOG.error("Unable to load {0}".format(module_path))
             raise e

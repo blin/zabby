@@ -75,6 +75,13 @@ To run os independent tests on all supported python version use tox_ .
 tox.ini is provided and includes all python environments supported by zabby(py26 through py33).
 You should try to test at least one py2 env and at least one py3 env.
 
+After running tox you can run zabby in a virtualenv:
+
+.. code-block:: sh
+
+    source .tox/py26/bin/activate
+    zabby -c zabby/examples/config.py
+
 .. _zabbix: http://www.zabbix.com/
 .. _nose: https://nose.readthedocs.org/
 .. _tox: http://tox.readthedocs.org

@@ -196,6 +196,16 @@ class TestSh():
         f = sh(COMMAND, raise_on_nonempty_err=True)
         assert_raises(OperatingSystemError, f)
 
+    def test_communicate_with_completed_process(self):
+        sh(COMMAND)()
+        self.process.communicate.assert_called_once_with()
+
+    def test_communicate_with_timed_out_process(self):
+        self.process.poll.return_value = None
+        command = sh(COMMAND, timeout=10.0)
+        assert_raises(OperatingSystemError, command)
+        self.process.communicate.assert_called_once_with()
+
 
 PORT = 8080
 REQUEST = b('')

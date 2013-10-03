@@ -163,20 +163,21 @@ def sh(command, timeout=1.0, wait_step=0.01, raise_on_empty_out=True,
                                                                      args))
         process = Popen(formatted_command, stdout=PIPE, stderr=PIPE, shell=True,
                         universal_newlines=True)
+        try:
+            if timeout:
+                wait_time_remaining = timeout
+                while process.poll() is None and wait_time_remaining > 0:
+                    time.sleep(wait_step)
+                    wait_time_remaining -= wait_step
 
-        if timeout:
-            wait_time_remaining = timeout
-            while process.poll() is None and wait_time_remaining > 0:
-                time.sleep(wait_step)
-                wait_time_remaining -= wait_step
+                if wait_time_remaining <= 0:
+                    process.kill()
+                    raise OperatingSystemError(
+                        "{0} have not completed in {1} seconds".format(
+                            formatted_command, timeout))
+        finally:
+            (out, err) = process.communicate()
 
-            if wait_time_remaining <= 0:
-                process.kill()
-                raise OperatingSystemError(
-                    "{0} have not completed in {1} seconds".format(
-                        formatted_command, timeout))
-
-        (out, err) = process.communicate()
         (out, err) = (out.rstrip(), err.rstrip())
 
         if out == '' and raise_on_empty_out:
@@ -238,6 +239,7 @@ def exception_guard(function, exception_class=Exception, sentinel=0):
     Returns a wrapper over function that calls function in a try block
     if exception_class is raised sentinel value will be returned
     """
+
     def wrapper(*args):
         try:
             return function(*args)

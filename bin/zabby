@@ -20,10 +20,8 @@ config_manager = ConfigManager(options.config, ModuleLoader())
 config_manager.update_config()
 
 if options.daemonize:
-    daemonize(options.pid_file)
+    daemonize(options.pid_file, options.error_log)
 
-# at this point stdout and stderr are written to nowhere
-# every exception should be logged
 try:
     set_data_source(DataSource(KeyParser(), config_manager))
     set_protocol(ZBXDProtocol())

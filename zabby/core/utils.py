@@ -161,8 +161,8 @@ def sh(command, timeout=1.0, wait_step=0.01, raise_on_empty_out=True,
             raise WrongArgumentError(
                 "'{0}' not enough arguments. Called with {1}".format(command,
                                                                      args))
-        process = Popen(formatted_command, stdout=PIPE, stderr=PIPE, shell=True,
-                        universal_newlines=True)
+        process = Popen(formatted_command, stdout=PIPE, stderr=PIPE,
+                        shell=True, close_fds=True, universal_newlines=True)
         try:
             if timeout:
                 wait_time_remaining = timeout

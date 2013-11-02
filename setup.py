@@ -24,16 +24,16 @@ setup(
     ],
     url='https://github.com/blin/zabby',
     license='MIT',
-    author='blin',
+    author='Evgeniy Petrov',
     author_email='blin@f4oe.org',
-    description='This is a fork of zabbix agent to python',
+    description='Implementation of zabbix agent in python',
     scripts=['bin/zabby', 'bin/zabby_interactive', 'bin/zabby_get', ],
     package_data={
         'zabby': ['examples/config.py', 'examples/logging.conf',
                   'examples/items/*', ]
     },
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 4 - Beta',
         'Topic :: System :: Monitoring',
         'Intended Audience :: System Administrators',
         'Programming Language :: Python :: 2',

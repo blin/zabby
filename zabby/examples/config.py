@@ -1,7 +1,7 @@
 import os
 
-listen_host = '127.0.0.1'
-listen_port = 10050
+listen_host = '0.0.0.0'
+listen_port = 10052
 
 _config_dir = os.path.dirname(os.path.abspath(__file__))
 

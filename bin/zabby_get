@@ -8,7 +8,7 @@ from zabby.agent import ZBXDProtocol
 option_parser = optparse.OptionParser()
 option_parser.add_option('-s', '--host', default='127.0.0.1',
                          help='host name or IP address of a host')
-option_parser.add_option('-p', '--port', type=int, default=10050,
+option_parser.add_option('-p', '--port', type=int, default=10052,
                          help='port number of agent running on the host')
 option_parser.add_option('-t', '--timeout', type=float, default=1.0,
                          help='socket timeout')

@@ -21,8 +21,8 @@ ITEM_MODULES_COUNT = 2
 class TestConfigManager():
     def setup(self):
         self.config_module = Mock()
-        self.config_module.listen_host = '127.0.0.1'
-        self.config_module.listen_port = 10050
+        self.config_module.listen_host = '0.0.0.0'
+        self.config_module.listen_port = 10052
         self.config_module.item_files = list()
 
         self._patcher = patch('logging.config')
